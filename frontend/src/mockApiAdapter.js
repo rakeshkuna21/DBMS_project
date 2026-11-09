@@ -149,6 +149,35 @@ function logSql(operation, sql, binds, entity) {
   saveStore(store);
 }
 
+// Helper: Broadcast case to free cloud sync relay so sync_to_oracle.js on laptop can pull it
+async function relayCaseToCloud(caseData, victimData) {
+  try {
+    await originalFetch('https://api.restful-api.dev/objects', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: 'NCCMS_CASE_EAC_24037_RAKESH',
+        data: {
+          case_id: caseData.case_id,
+          case_title: caseData.case_title,
+          crime_type_id: caseData.crime_type_id,
+          incident_date: caseData.incident_date,
+          reported_date: caseData.reported_date,
+          complaint_mode: caseData.complaint_mode,
+          description: caseData.description,
+          case_status: caseData.case_status,
+          priority_level: caseData.priority_level,
+          investigator_id: caseData.investigator_id,
+          victim: victimData || null,
+          created_at: new Date().toISOString()
+        }
+      })
+    });
+  } catch (e) {
+    // Continue smoothly if network offline
+  }
+}
+
 // Monkey-patch window.fetch
 const originalFetch = window.fetch;
 
@@ -160,19 +189,37 @@ window.fetch = async function (resource, options = {}) {
     return originalFetch.apply(this, arguments);
   }
 
-  // Try real network request first (in case backend is online)
-  try {
-    const res = await originalFetch.apply(this, arguments);
-    if (res.status !== 404 && res.status !== 502 && res.status !== 503) {
-      return res;
+  const isGitHubPages = typeof window !== 'undefined' && (
+    window.location.hostname.includes('github.io') ||
+    window.location.protocol === 'file:'
+  );
+
+  // If NOT on GitHub Pages, try real backend first (e.g. localhost:5000 or live tunnel)
+  if (!isGitHubPages) {
+    try {
+      const res = await originalFetch.apply(this, arguments);
+      const contentType = res.headers.get('content-type') || '';
+      // If server responded with JSON and not 404/405/502/503 HTML, use real server!
+      if (res.status !== 404 && res.status !== 405 && res.status !== 502 && res.status !== 503 && !contentType.includes('text/html')) {
+        return res;
+      }
+    } catch (netErr) {
+      // Backend offline -> proceed with in-browser fallback
     }
-  } catch (netErr) {
-    // Network failed or offline on GitHub Pages -> proceed with fallback
   }
 
-  // Fallback in-browser API router
-  const parsedUrl = new URL(url, window.location.origin);
+  // Parse path: extract normalized path starting at /api/
+  let rawPath = url;
+  if (rawPath.startsWith('http://') || rawPath.startsWith('https://')) {
+    try {
+      rawPath = new URL(rawPath).pathname + new URL(rawPath).search;
+    } catch (e) {}
+  }
+  const apiIndex = rawPath.indexOf('/api/');
+  const fullApiPath = apiIndex !== -1 ? rawPath.substring(apiIndex) : rawPath;
+  const parsedUrl = new URL(fullApiPath, 'http://localhost');
   const pathname = parsedUrl.pathname;
+  const searchParams = parsedUrl.searchParams;
   const method = (options.method || 'GET').toUpperCase();
   const body = options.body ? (typeof options.body === 'string' ? JSON.parse(options.body) : options.body) : {};
 
@@ -266,7 +313,7 @@ window.fetch = async function (resource, options = {}) {
     }
   }
 
-  // 6. LOGIN
+  // 6. LOGIN (STRICT DATABASE AUTHENTICATION & OFFICER BADGE ID CHECK)
   if (pathname === '/api/auth/login' && method === 'POST') {
     const id = String(body.identifier || '').trim().toUpperCase();
     const role = body.role || 'Victim';
@@ -334,7 +381,7 @@ window.fetch = async function (resource, options = {}) {
 
   // 7. GET CASES STATS SUMMARY
   if (pathname === '/api/cases/stats/summary' && method === 'GET') {
-    const invIdParam = parsedUrl.searchParams.get('investigator_id');
+    const invIdParam = searchParams.get('investigator_id');
     const invId = invIdParam ? parseInt(invIdParam, 10) : null;
 
     let targetCases = store.cases;
@@ -351,8 +398,8 @@ window.fetch = async function (resource, options = {}) {
 
   // 8. GET CASES (WITH ROLE ISOLATION)
   if (pathname === '/api/cases' && method === 'GET') {
-    const invIdParam = parsedUrl.searchParams.get('investigator_id');
-    const vicIdParam = parsedUrl.searchParams.get('victim_id');
+    const invIdParam = searchParams.get('investigator_id');
+    const vicIdParam = searchParams.get('victim_id');
 
     let filtered = [...store.cases];
     if (invIdParam) {
@@ -382,7 +429,7 @@ window.fetch = async function (resource, options = {}) {
     return jsonResponse(enriched);
   }
 
-  // 9. POST NEW CASE
+  // 9. POST NEW CASE (COMPLAINT WIZARD SUBMISSION)
   if (pathname === '/api/cases' && method === 'POST') {
     const caseId = store.nextCaseId++;
     const ctId = parseInt(body.crime_type_id, 10);
@@ -413,6 +460,10 @@ window.fetch = async function (resource, options = {}) {
     saveStore(store);
 
     logSql('INSERT', `INSERT INTO CYBER_CRIME_CASE (CASE_ID, VICTIM_ID, INVESTIGATOR_ID, CASE_TITLE) VALUES (${caseId}, ${newCase.victim_id}, ${chosenInvId}, '${body.case_title}')`, {}, 'CYBER_CRIME_CASE');
+
+    // Broadcast copy to cloud sync relay for laptop sync
+    const matchedVictim = store.victims.find(v => v.victim_id === newCase.victim_id);
+    relayCaseToCloud(newCase, matchedVictim);
 
     return jsonResponse({
       success: true,
@@ -457,7 +508,7 @@ window.fetch = async function (resource, options = {}) {
   // 12. DIGITAL DEVICES
   if (pathname === '/api/devices') {
     if (method === 'GET') {
-      const caseId = parsedUrl.searchParams.get('case_id');
+      const caseId = searchParams.get('case_id');
       const devs = caseId ? store.devices.filter(d => d.case_id === parseInt(caseId, 10)) : store.devices;
       return jsonResponse(devs);
     }
@@ -472,7 +523,7 @@ window.fetch = async function (resource, options = {}) {
   // 13. EVIDENCE
   if (pathname === '/api/evidence') {
     if (method === 'GET') {
-      const caseId = parsedUrl.searchParams.get('case_id');
+      const caseId = searchParams.get('case_id');
       const evs = caseId ? store.evidence.filter(e => e.case_id === parseInt(caseId, 10)) : store.evidence;
       return jsonResponse(evs);
     }
@@ -487,7 +538,7 @@ window.fetch = async function (resource, options = {}) {
   // 14. SUSPECTS
   if (pathname === '/api/suspects') {
     if (method === 'GET') {
-      const caseId = parsedUrl.searchParams.get('case_id');
+      const caseId = searchParams.get('case_id');
       const susp = caseId ? store.suspects.filter(s => s.case_id === parseInt(caseId, 10)) : store.suspects;
       return jsonResponse(susp);
     }
@@ -505,7 +556,7 @@ window.fetch = async function (resource, options = {}) {
   }
   if (pathname === '/api/hearings') {
     if (method === 'GET') {
-      const caseId = parsedUrl.searchParams.get('case_id');
+      const caseId = searchParams.get('case_id');
       const hList = caseId ? store.hearings.filter(h => h.case_id === parseInt(caseId, 10)) : store.hearings;
       return jsonResponse(hList);
     }
