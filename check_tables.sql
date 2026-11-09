@@ -1,0 +1,4 @@
+SET PAGESIZE 100;
+SET LINESIZE 200;
+SELECT table_name FROM all_tables WHERE owner = 'EAC_24037_RAKESH' ORDER BY table_name;
+EXIT;
