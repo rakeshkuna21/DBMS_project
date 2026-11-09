@@ -1,0 +1,15 @@
+{
+  "name": "national-cyber-crime-portal",
+  "version": "2.0.0",
+  "description": "National Cyber Crime Reporting & Management Portal with Oracle Express 11g Integration",
+  "main": "backend/server.js",
+  "scripts": {
+    "start": "node backend/server.js",
+    "sync-to-oracle": "node sync_to_oracle.js",
+    "viva": "node viva_demo_server.js",
+    "build": "cd frontend && npm run build",
+    "frontend": "cd frontend && npm run dev"
+  },
+  "author": "Krish Vats, Sai Dheepak, Rakeesh, Shanmukh",
+  "license": "ISC"
+}
