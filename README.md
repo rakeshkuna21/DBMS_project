@@ -2,6 +2,8 @@
 
 > Ministry of Home Affairs | Government of India (Academic Production Portal)
 
+🌐 **Live 24/7 Web Portal:** [https://rakeshkuna21.github.io/DBMS_project/](https://rakeshkuna21.github.io/DBMS_project/)
+
 ## Course: Database Management Systems (DBMS)
 **Project Engineers:** Krish Vats, Sai Dheepak, Rakeesh, and Shanmukh
 
