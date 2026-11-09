@@ -149,32 +149,34 @@ function logSql(operation, sql, binds, entity) {
   saveStore(store);
 }
 
+const KV_SYNC_URL = 'https://kvdb.io/2uN783pLc6vQynyUCStLdk/nccms_cloud_cases';
+
 // Helper: Broadcast case to free cloud sync relay so sync_to_oracle.js on laptop can pull it
 async function relayCaseToCloud(caseData, victimData) {
   try {
-    await originalFetch('https://api.restful-api.dev/objects', {
+    let existingList = [];
+    try {
+      const getRes = await originalFetch(KV_SYNC_URL);
+      if (getRes.ok) existingList = await getRes.json();
+    } catch (e) {}
+    if (!Array.isArray(existingList)) existingList = [];
+
+    const payload = {
+      ...caseData,
+      victim: victimData || null,
+      synced_at: new Date().toISOString()
+    };
+    if (!existingList.some(c => c.case_id === caseData.case_id)) {
+      existingList.unshift(payload);
+    }
+    await originalFetch(KV_SYNC_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        name: 'NCCMS_CASE_EAC_24037_RAKESH',
-        data: {
-          case_id: caseData.case_id,
-          case_title: caseData.case_title,
-          crime_type_id: caseData.crime_type_id,
-          incident_date: caseData.incident_date,
-          reported_date: caseData.reported_date,
-          complaint_mode: caseData.complaint_mode,
-          description: caseData.description,
-          case_status: caseData.case_status,
-          priority_level: caseData.priority_level,
-          investigator_id: caseData.investigator_id,
-          victim: victimData || null,
-          created_at: new Date().toISOString()
-        }
-      })
+      body: JSON.stringify(existingList)
     });
-  } catch (e) {
-    // Continue smoothly if network offline
+    console.log('☁️ Case successfully broadcasted to Cloud Sync Relay.');
+  } catch (err) {
+    // Continue smoothly if offline
   }
 }
 
