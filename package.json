@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node backend/server.js",
     "sync-to-oracle": "node sync_to_oracle.js",
+    "view-oracle": "node view_oracle.js",
     "viva": "node viva_demo_server.js",
     "build": "cd frontend && npm run build",
     "frontend": "cd frontend && npm run dev"
