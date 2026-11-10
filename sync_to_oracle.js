@@ -1,10 +1,11 @@
-// sync_to_oracle.js - Synchronize 24/7 Cloud Filed Cases into Local Oracle Express 11g
+// sync_to_oracle.js - Synchronize 24/7 Cloud Filed Cases & Signups into Local Oracle Express 11g
 // National Cyber Crime Reporting & Management Portal
 // Schema: EAC_24037_RAKESH | Ministry of Home Affairs
 
 const oracledb = require('./backend/node_modules/oracledb');
 
 const KV_SYNC_URL = 'https://kvdb.io/2uN783pLc6vQynyUCStLdk/nccms_cloud_cases';
+const KV_USERS_URL = 'https://kvdb.io/2uN783pLc6vQynyUCStLdk/nccms_cloud_users';
 
 async function runSync() {
   console.log('====================================================================');
@@ -12,31 +13,29 @@ async function runSync() {
   console.log('  Target Schema: EAC_24037_RAKESH | Database: Oracle Express 11g XE');
   console.log('====================================================================\n');
 
-  // 1. Fetch from Cloud Relay
-  console.log('📡 1. Querying 24/7 Cloud Relay for newly filed citizen complaints...');
+  // 1. Fetch from Cloud Relays
+  console.log('📡 1. Querying 24/7 Cloud Relay for newly registered citizens & complaints...');
   let cloudCases = [];
-  try {
-    const res = await fetch(KV_SYNC_URL);
-    if (res.ok) {
-      cloudCases = await res.json();
-    }
-  } catch (err) {
-    console.error('⚠️ Could not connect to Cloud Sync Relay:', err.message);
-    process.exit(1);
-  }
+  let cloudUsers = [];
 
-  if (!Array.isArray(cloudCases) || cloudCases.length === 0) {
-    console.log('ℹ️  No new citizen complaints currently waiting in cloud queue.\n');
-  } else {
-    console.log(`📥 Found ${cloudCases.length} complaint(s) in 24/7 Cloud Relay.\n`);
-  }
+  try {
+    const cRes = await fetch(KV_SYNC_URL);
+    if (cRes.ok) cloudCases = await cRes.json();
+  } catch (err) {}
+  if (!Array.isArray(cloudCases)) cloudCases = [];
+
+  try {
+    const uRes = await fetch(KV_USERS_URL);
+    if (uRes.ok) cloudUsers = await uRes.json();
+  } catch (err) {}
+  if (!Array.isArray(cloudUsers)) cloudUsers = [];
+
+  console.log(`📥 Found ${cloudUsers.length} registered citizen(s) and ${cloudCases.length} complaint(s) in 24/7 Cloud Relay.\n`);
 
   // 2. Connect to Local Oracle 11g
   try {
     oracledb.initOracleClient({ libDir: 'C:\\oraclexe\\app\\oracle\\product\\11.2.0\\server\\bin' });
-  } catch (e) {
-    // Client already initialized or on PATH
-  }
+  } catch (e) {}
 
   let conn;
   try {
@@ -53,7 +52,48 @@ async function runSync() {
     process.exit(1);
   }
 
-  // 3. Sync Cases into Oracle 11g
+  // 3. Sync Pure Signups into LOGIN and VICTIM
+  let syncedUsersCount = 0;
+  for (const u of cloudUsers) {
+    const phone = u.phone ? String(u.phone).trim() : '';
+    if (!phone) continue;
+
+    const vicCheck = await conn.execute(
+      'SELECT VICTIM_ID FROM VICTIM WHERE PHONE = :phone',
+      { phone }
+    );
+
+    if (vicCheck.rows && vicCheck.rows.length > 0) {
+      continue; // already exists in Oracle
+    }
+
+    const email = u.email || 'citizen@cybercrime.gov.in';
+    const firstName = u.first_name || 'Citizen';
+    const lastName = u.last_name || 'User';
+    const city = u.city || 'Bengaluru';
+    const state = u.state || 'Karnataka';
+    const pincode = u.pincode || '560001';
+
+    try {
+      await conn.execute(
+        `INSERT INTO LOGIN (USER_ID, MOBILE_NUMBER, EMAIL, ROLE, ACTIVE_OTP, OTP_VERIFIED) 
+         VALUES (SEQ_USER_ID.NEXTVAL, :phone, :email, 'Victim', '482910', 'YES')`,
+        { phone, email }
+      );
+
+      await conn.execute(
+        `INSERT INTO VICTIM (VICTIM_ID, USER_ID, FIRST_NAME, LAST_NAME, DOB, GENDER, EMAIL, PHONE, STREET, CITY, STATE, PINCODE)
+         VALUES (SEQ_VICTIM_ID.NEXTVAL, SEQ_USER_ID.CURRVAL, :fn, :ln, TO_DATE('1998-01-01', 'YYYY-MM-DD'), 'Male', :email, :phone, 'Main Street', :city, :state, :pin)`,
+        { fn: firstName, ln: lastName, email, phone, city, state, pin: pincode }
+      );
+      syncedUsersCount++;
+      console.log(`  ✓ Synced Registered Citizen: "${firstName} ${lastName}" (Phone: ${phone}) into Oracle 11g`);
+    } catch (insErr) {
+      // Continue smoothly
+    }
+  }
+
+  // 4. Sync Cases into Oracle 11g
   let syncedCount = 0;
   let skippedCount = 0;
 
@@ -89,7 +129,6 @@ async function runSync() {
     if (vicCheck.rows && vicCheck.rows.length > 0) {
       victimId = vicCheck.rows[0][0];
     } else {
-      // Create Login & Victim record
       await conn.execute(
         `INSERT INTO LOGIN (USER_ID, MOBILE_NUMBER, EMAIL, ROLE, ACTIVE_OTP, OTP_VERIFIED) 
          VALUES (SEQ_USER_ID.NEXTVAL, :phone, :email, 'Victim', '482910', 'YES')`,
@@ -114,11 +153,11 @@ async function runSync() {
     // Insert Case into CYBER_CRIME_CASE
     const ctId = c.crime_type_id || 1;
     let invId = c.investigator_id || 1;
-    if (ctId === 1) invId = 8; // I4C ACP Kiran Varma
-    else if (ctId === 2) invId = 19; // Maharashtra Cyber
-    else if (ctId === 3) invId = 15; // Delhi IFSO
-    else if (ctId === 4) invId = 25; // Karnataka CID
-    else invId = 1; // CBI SP Arvind Swaminathan
+    if (ctId === 1) invId = 8;
+    else if (ctId === 2) invId = 19;
+    else if (ctId === 3) invId = 15;
+    else if (ctId === 4) invId = 25;
+    else invId = 1;
 
     const incDate = c.incident_date || new Date().toISOString().split('T')[0];
 
@@ -155,9 +194,10 @@ async function runSync() {
   console.log('\n====================================================================');
   console.log('  📊 SYNCHRONIZATION RESULTS');
   console.log('====================================================================');
-  console.log(`  Newly Synced to Oracle 11g : ${syncedCount} complaints`);
-  console.log(`  Already Existing (Skipped) : ${skippedCount} complaints`);
-  console.log(`  Total Victims in Oracle    : ${vCnt.rows[0][0]}`);
+  console.log(`  Newly Synced Citizens      : ${syncedUsersCount}`);
+  console.log(`  Newly Synced Complaints    : ${syncedCount}`);
+  console.log(`  Already Existing (Skipped) : ${skippedCount}`);
+  console.log(`  Total Citizens in Oracle   : ${vCnt.rows[0][0]}`);
   console.log(`  Total Cases in Oracle      : ${cCnt.rows[0][0]}`);
   console.log(`  Total Officers in Oracle   : ${iCnt.rows[0][0]}`);
   console.log('====================================================================');

@@ -258,6 +258,7 @@ function logSql(operation, sql, binds, entity) {
 }
 
 const KV_SYNC_URL = 'https://kvdb.io/2uN783pLc6vQynyUCStLdk/nccms_cloud_cases';
+const KV_USERS_URL = 'https://kvdb.io/2uN783pLc6vQynyUCStLdk/nccms_cloud_users';
 
 // Helper: Broadcast case to free cloud sync relay so sync_to_oracle.js on laptop can pull it
 async function relayCaseToCloud(caseData, victimData) {
@@ -287,6 +288,80 @@ async function relayCaseToCloud(caseData, victimData) {
     // Continue smoothly if offline
   }
 }
+
+// Helper: Broadcast registered citizen to cloud sync relay
+async function relayUserToCloud(userData) {
+  try {
+    let existingList = [];
+    try {
+      const getRes = await originalFetch(KV_USERS_URL);
+      if (getRes.ok) existingList = await getRes.json();
+    } catch (e) {}
+    if (!Array.isArray(existingList)) existingList = [];
+
+    if (!existingList.some(u => u.phone === userData.phone)) {
+      existingList.unshift(userData);
+    }
+    await originalFetch(KV_USERS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(existingList)
+    });
+    console.log('☁️ Registered citizen successfully broadcasted to Cloud Sync Relay.');
+  } catch (err) {}
+}
+
+// Automatically sync latest cloud complaints & registrations on startup so all users see them
+async function pullCloudStateIntoStore() {
+  try {
+    const store = loadStore();
+    let updated = false;
+
+    // Pull cases
+    try {
+      const cRes = await originalFetch(KV_SYNC_URL);
+      if (cRes.ok) {
+        const cloudCases = await cRes.json();
+        if (Array.isArray(cloudCases)) {
+          for (const cc of cloudCases) {
+            if (!store.cases.some(c => c.case_id === cc.case_id || c.case_title === cc.case_title)) {
+              store.cases.unshift(cc);
+              if (cc.victim && !store.victims.some(v => v.phone === cc.victim.phone)) {
+                store.victims.unshift(cc.victim);
+                store.users.unshift(cc.victim);
+              }
+              updated = true;
+            }
+          }
+        }
+      }
+    } catch (e) {}
+
+    // Pull users
+    try {
+      const uRes = await originalFetch(KV_USERS_URL);
+      if (uRes.ok) {
+        const cloudUsers = await uRes.json();
+        if (Array.isArray(cloudUsers)) {
+          for (const cu of cloudUsers) {
+            if (!store.victims.some(v => v.phone === cu.phone)) {
+              store.victims.unshift(cu);
+              store.users.unshift(cu);
+              updated = true;
+            }
+          }
+        }
+      }
+    } catch (e) {}
+
+    if (updated) {
+      saveStore(store);
+      console.log('🔄 Synced latest cloud users and cases into local store.');
+    }
+  } catch (err) {}
+}
+
+pullCloudStateIntoStore();
 
 // Monkey-patch window.fetch
 const originalFetch = window.fetch;
@@ -411,6 +486,9 @@ window.fetch = async function (resource, options = {}) {
     saveStore(store);
 
     logSql('INSERT', `INSERT INTO VICTIM (VICTIM_ID, FIRST_NAME, LAST_NAME, PHONE) VALUES (${victimId}, '${body.first_name}', '${body.last_name}', '${phone}')`, {}, 'VICTIM');
+
+    // Broadcast copy to cloud sync relay for laptop sync
+    relayUserToCloud(newVictim);
 
     return jsonResponse({ success: true, user: newVictim }, 201);
   }
