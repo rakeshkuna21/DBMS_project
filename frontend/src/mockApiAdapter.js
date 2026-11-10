@@ -1,4 +1,4 @@
-// mockApiAdapter.js - Universal In-Browser Client API & LocalStorage Fallback
+// mockApiAdapter.js - Universal In-Browser Client API & LocalStorage Fallback (v3)
 // Enables 100% 24/7 standalone execution on GitHub Pages, offline laptops, or production servers.
 
 const DEPARTMENTS = [
@@ -91,8 +91,8 @@ const COURTS = [
   { court_id: 5, court_name: 'Metropolitan Magistrate Cyber Crime Court, Egmore', city: 'Chennai', state: 'Tamil Nadu' }
 ];
 
-// Initialize local store
-const STORAGE_KEY = 'nccms_inbrowser_db_v2';
+// Initialize local store version 3
+const STORAGE_KEY = 'nccms_inbrowser_db_v3';
 
 function loadStore() {
   try {
@@ -110,18 +110,126 @@ function loadStore() {
     phone: o.phone
   }));
 
+  // Verified Pre-seeded Citizens
+  const initialVictims = [
+    {
+      victim_id: 1,
+      user_id: 1,
+      first_name: 'Rajesh',
+      middle_name: '',
+      last_name: 'Sharma',
+      name: 'Rajesh Sharma',
+      dob: '1995-04-12',
+      gender: 'Male',
+      email: 'rajesh.sharma@example.com',
+      phone: '9876543210',
+      street: '4th Main, Indiranagar',
+      city: 'Bengaluru',
+      state: 'Karnataka',
+      pincode: '560038',
+      password: 'Citizen@2026',
+      role: 'Victim'
+    },
+    {
+      victim_id: 2,
+      user_id: 2,
+      first_name: 'Sai',
+      middle_name: 'Dheepak',
+      last_name: 'K',
+      name: 'Sai Dheepak K',
+      dob: '2001-08-19',
+      gender: 'Male',
+      email: 'saidheepakk37@gmail.com',
+      phone: '8187872483',
+      street: 'Kota Street, Atmakur Bus Stand',
+      city: 'Bengaluru',
+      state: 'Karnataka',
+      pincode: '560035',
+      password: 'Citizen@2026',
+      role: 'Victim'
+    }
+  ];
+
+  // Verified Pre-seeded Cyber Crime Cases
+  const initialCases = [
+    {
+      case_id: 2025001,
+      victim_id: 1,
+      crime_type_id: 1,
+      investigator_id: 1, // SP Arvind Swaminathan (CBI-CYB-101)
+      case_title: 'UPI Phishing QR Code Debit - Rs 48,500 Unauthorized Transfer',
+      incident_date: '2026-11-04',
+      reported_date: '2026-11-05',
+      complaint_mode: 'Online Portal',
+      description: 'Scammer sent a fake payment confirmation QR code claiming to be customer care. Scanning the code resulted in immediate debit of Rs 48,500 from bank account.',
+      case_status: 'Under Investigation',
+      priority_level: 'High'
+    },
+    {
+      case_id: 2025002,
+      victim_id: 2,
+      crime_type_id: 2,
+      investigator_id: 8, // ACP Kiran Varma (I4C-INV-202)
+      case_title: 'Instagram Account Hijack & Blackmail via Morphed Photos',
+      incident_date: '2026-11-06',
+      reported_date: '2026-11-07',
+      complaint_mode: 'Online Portal',
+      description: 'Account compromised after clicking phishing link. Perpetrator demanding Rs 25,000 via UPI to prevent sharing private chats.',
+      case_status: 'Under Investigation',
+      priority_level: 'Critical'
+    },
+    {
+      case_id: 2025003,
+      victim_id: 1,
+      crime_type_id: 4,
+      investigator_id: 25, // DySP Anand Gowda (KA-POL-501)
+      case_title: 'Telegram Part-Time Hotel Rating Investment Scam - Rs 2,40,000 Lost',
+      incident_date: '2026-11-01',
+      reported_date: '2026-11-03',
+      complaint_mode: 'Helpline 1930',
+      description: 'Victim was added to Telegram group offering part-time earnings for Google reviews. Initial payouts received, subsequent deposit of 2.4 Lakhs frozen by fraudulent platform.',
+      case_status: 'Charge Sheet Filed',
+      priority_level: 'High'
+    }
+  ];
+
+  const initialDevices = [
+    { device_id: 101, case_id: 2025001, device_type: 'Mobile Phone', brand: 'Samsung', model: 'Galaxy S23', operating_system: 'Android 14', serial_no: 'SM-S911B-IND' },
+    { device_id: 102, case_id: 2025002, device_type: 'Mobile Phone', brand: 'Apple', model: 'iPhone 14 Pro', operating_system: 'iOS 17', serial_no: 'APL-14P-9821' },
+    { device_id: 103, case_id: 2025003, device_type: 'Laptop', brand: 'Dell', model: 'Inspiron 15', operating_system: 'Windows 11', serial_no: 'DL-INSP-2024' }
+  ];
+
+  const initialEvidence = [
+    { evidence_id: 201, case_id: 2025001, evidence_type: 'Bank Statement / UPI Receipt', description: 'HDFC Bank Account Statement showing UTR transfer to mule account', file_hash: 'SHA256: 7d4a9f82bc103982e01', collected_date: '2026-11-05' },
+    { evidence_id: 202, case_id: 2025002, evidence_type: 'Chat Logs & Screenshots', description: 'Screenshots of extortion WhatsApp messages from +91-9102837465', file_hash: 'SHA256: 3c2e1189abf002931a8', collected_date: '2026-11-07' },
+    { evidence_id: 203, case_id: 2025003, evidence_type: 'Crypto Transaction Hash', description: 'USDT transfer hash and fraudulent Telegram merchant portal screenshots', file_hash: 'SHA256: 99a1bc44df110385cc2', collected_date: '2026-11-03' }
+  ];
+
+  const initialSuspects = [
+    { suspect_id: 301, case_id: 2025001, name: 'Imran Qureshi', phone: '9102837465', account_no: '50100482910482 (HDFC Bank)', upi_id: 'imranq@okhdfcbank', city: 'Mumbai', state: 'Maharashtra', arrest_status: 'Arrested', notes: 'Mule bank account holder used to siphon UPI fraud amounts across 14 police circles.' },
+    { suspect_id: 302, case_id: 2025002, name: 'Unknown Perpetrator (Handle: @darknet_rex)', phone: '9871234560', account_no: '30948291823 (State Bank of India)', upi_id: 'fastcrypto@paytm', city: 'Noida', state: 'Uttar Pradesh', arrest_status: 'Absconding', notes: 'Telegram handle operator coordinating account takeover and extortion network.' },
+    { suspect_id: 303, case_id: 2025003, name: 'Pooja Deshmukh', phone: '9820011223', account_no: '002901591827 (ICICI Bank)', upi_id: 'telegramtask@icici', city: 'Pune', state: 'Maharashtra', arrest_status: 'Under Surveillance', notes: 'Recruiter account for fake rating scam with multiple flagged bank complaints on 1930 portal.' }
+  ];
+
+  const initialHearings = [
+    { hearing_id: 401, case_id: 2025001, court_id: 3, hearing_date: '2026-11-20', hearing_status: 'Scheduled', judge_name: 'Hon. Justice K. Ramanathan', remarks: 'Submission of forensic device image and cyber cell charge sheet.' }
+  ];
+
   const initialStore = {
-    victims: [],
-    cases: [],
-    devices: [],
-    evidence: [],
-    suspects: [],
-    hearings: [],
-    users: [],
+    victims: initialVictims,
+    cases: initialCases,
+    devices: initialDevices,
+    evidence: initialEvidence,
+    suspects: initialSuspects,
+    hearings: initialHearings,
+    users: [...initialVictims],
     investigators,
-    sqlLogs: [],
-    nextCaseId: 2025001,
-    nextVictimId: 1
+    sqlLogs: [
+      { id: 1, operation: 'SELECT', sql: 'SELECT * FROM CYBER_CRIME_CASE WHERE STATUS = :status', binds: { status: 'Under Investigation' }, source: 'Oracle 11g XE (Simulated)', entity: 'CYBER_CRIME_CASE', timestamp: new Date(Date.now() - 3600000).toISOString() },
+      { id: 2, operation: 'SELECT', sql: 'SELECT * FROM INVESTIGATOR WHERE DEPARTMENT_ID = 1', binds: {}, source: 'Oracle 11g XE (Simulated)', entity: 'INVESTIGATOR', timestamp: new Date(Date.now() - 7200000).toISOString() }
+    ],
+    nextCaseId: 2025004,
+    nextVictimId: 3
   };
   saveStore(initialStore);
   return initialStore;
@@ -238,7 +346,7 @@ window.fetch = async function (resource, options = {}) {
   if (pathname === '/api/health') {
     return jsonResponse({
       status: 'HEALTHY',
-      system: 'National Cyber Crime Management Portal (GitHub Pages Autonomous Mode)',
+      system: 'National Cyber Crime Management Portal (Autonomous Live Engine)',
       oracleConnected: true,
       databaseMode: 'Client In-Browser Autonomous Store (24/7 Active)',
       timestamp: new Date().toISOString()
@@ -250,9 +358,20 @@ window.fetch = async function (resource, options = {}) {
     return jsonResponse(CRIME_TYPES);
   }
 
-  // 3. SEND REGISTRATION OTP
-  if (pathname === '/api/auth/send-registration-otp' && method === 'POST') {
-    const phone = body.phone || '9876543210';
+  // 3. SEND REGISTRATION OTP (Handles BOTH /send-reg-otp AND /send-registration-otp)
+  if ((pathname === '/api/auth/send-reg-otp' || pathname === '/api/auth/send-registration-otp') && method === 'POST') {
+    const phone = String(body.phone || '').trim();
+    const email = String(body.email || '').trim().toLowerCase();
+
+    // Check if account already exists
+    const existing = store.victims.find(v => v.phone === phone || (email && v.email?.toLowerCase() === email));
+    if (existing) {
+      return jsonResponse({
+        error: 'Account already exists. Please log in instead.',
+        already_exists: true
+      }, 409);
+    }
+
     const otp = '482910';
     return jsonResponse({
       success: true,
@@ -275,6 +394,7 @@ window.fetch = async function (resource, options = {}) {
       first_name: body.first_name,
       middle_name: body.middle_name || '',
       last_name: body.last_name,
+      name: `${body.first_name} ${body.last_name}`.trim(),
       dob: body.dob,
       gender: body.gender,
       email: body.email || '',
@@ -369,7 +489,7 @@ window.fetch = async function (resource, options = {}) {
           victim_id: vic.victim_id,
           first_name: vic.first_name,
           last_name: vic.last_name,
-          name: `${vic.first_name} ${vic.last_name}`,
+          name: `${vic.first_name} ${vic.last_name}`.trim(),
           phone: vic.phone,
           email: vic.email,
           city: vic.city,
@@ -418,7 +538,7 @@ window.fetch = async function (resource, options = {}) {
       const ct = CRIME_TYPES.find(t => t.crime_type_id === c.crime_type_id);
       return {
         ...c,
-        victim_name: vic ? `${vic.first_name} ${vic.last_name}` : 'Citizen',
+        victim_name: vic ? `${vic.first_name} ${vic.last_name}`.trim() : 'Citizen',
         victim_phone: vic?.phone || 'N/A',
         victim_city: vic?.city || 'N/A',
         investigator_name: inv?.name || 'Assigned Officer',
@@ -438,11 +558,11 @@ window.fetch = async function (resource, options = {}) {
 
     // Crime category routing to duty circle:
     let chosenInvId = 1;
-    if (ctId === 1) chosenInvId = 8; // I4C ACP Kiran Varma
-    else if (ctId === 2) chosenInvId = 19; // Maharashtra Cyber
+    if (ctId === 1) chosenInvId = 1; // CBI SP Arvind Swaminathan
+    else if (ctId === 2) chosenInvId = 8; // I4C ACP Kiran Varma
     else if (ctId === 3) chosenInvId = 15; // Delhi IFSO
     else if (ctId === 4) chosenInvId = 25; // Karnataka CID
-    else chosenInvId = 1; // CBI SP Arvind Swaminathan
+    else chosenInvId = 1;
 
     const today = new Date().toISOString().split('T')[0];
     const newCase = {
@@ -507,11 +627,14 @@ window.fetch = async function (resource, options = {}) {
     });
   }
 
-  // 12. DIGITAL DEVICES
-  if (pathname === '/api/devices') {
+  // 12. DIGITAL DEVICES (Supports /api/devices AND /api/devices/case/:id)
+  if (pathname === '/api/devices' || pathname.startsWith('/api/devices/case/')) {
     if (method === 'GET') {
-      const caseId = searchParams.get('case_id');
-      const devs = caseId ? store.devices.filter(d => d.case_id === parseInt(caseId, 10)) : store.devices;
+      let caseId = searchParams.get('case_id');
+      if (pathname.startsWith('/api/devices/case/')) {
+        caseId = pathname.split('/').pop();
+      }
+      const devs = caseId ? store.devices.filter(d => String(d.case_id) === String(caseId)) : store.devices;
       return jsonResponse(devs);
     }
     if (method === 'POST') {
@@ -522,11 +645,14 @@ window.fetch = async function (resource, options = {}) {
     }
   }
 
-  // 13. EVIDENCE
-  if (pathname === '/api/evidence') {
+  // 13. EVIDENCE (Supports /api/evidence AND /api/evidence/case/:id)
+  if (pathname === '/api/evidence' || pathname.startsWith('/api/evidence/case/')) {
     if (method === 'GET') {
-      const caseId = searchParams.get('case_id');
-      const evs = caseId ? store.evidence.filter(e => e.case_id === parseInt(caseId, 10)) : store.evidence;
+      let caseId = searchParams.get('case_id');
+      if (pathname.startsWith('/api/evidence/case/')) {
+        caseId = pathname.split('/').pop();
+      }
+      const evs = caseId ? store.evidence.filter(e => String(e.case_id) === String(caseId)) : store.evidence;
       return jsonResponse(evs);
     }
     if (method === 'POST') {
@@ -537,11 +663,14 @@ window.fetch = async function (resource, options = {}) {
     }
   }
 
-  // 14. SUSPECTS
-  if (pathname === '/api/suspects') {
+  // 14. SUSPECTS (Supports /api/suspects, /api/suspects/case/:id, and PUT /api/suspects/:id)
+  if (pathname === '/api/suspects' || pathname.startsWith('/api/suspects/case/')) {
     if (method === 'GET') {
-      const caseId = searchParams.get('case_id');
-      const susp = caseId ? store.suspects.filter(s => s.case_id === parseInt(caseId, 10)) : store.suspects;
+      let caseId = searchParams.get('case_id');
+      if (pathname.startsWith('/api/suspects/case/')) {
+        caseId = pathname.split('/').pop();
+      }
+      const susp = caseId ? store.suspects.filter(s => String(s.case_id) === String(caseId)) : store.suspects;
       return jsonResponse(susp);
     }
     if (method === 'POST') {
@@ -552,14 +681,28 @@ window.fetch = async function (resource, options = {}) {
     }
   }
 
+  if (pathname.startsWith('/api/suspects/') && method === 'PUT') {
+    const sId = pathname.split('/').pop();
+    const target = store.suspects.find(s => String(s.suspect_id) === String(sId));
+    if (target) {
+      if (body.arrest_status) target.arrest_status = body.arrest_status;
+      saveStore(store);
+      logSql('UPDATE', `UPDATE SUSPECT SET ARREST_STATUS = '${target.arrest_status}' WHERE SUSPECT_ID = ${sId}`, {}, 'SUSPECT');
+    }
+    return jsonResponse({ success: true });
+  }
+
   // 15. COURTS & HEARINGS
   if (pathname === '/api/courts') {
     return jsonResponse(COURTS);
   }
-  if (pathname === '/api/hearings') {
+  if (pathname === '/api/hearings' || pathname.startsWith('/api/hearings/case/')) {
     if (method === 'GET') {
-      const caseId = searchParams.get('case_id');
-      const hList = caseId ? store.hearings.filter(h => h.case_id === parseInt(caseId, 10)) : store.hearings;
+      let caseId = searchParams.get('case_id');
+      if (pathname.startsWith('/api/hearings/case/')) {
+        caseId = pathname.split('/').pop();
+      }
+      const hList = caseId ? store.hearings.filter(h => String(h.case_id) === String(caseId)) : store.hearings;
       return jsonResponse(hList);
     }
     if (method === 'POST') {
@@ -570,8 +713,13 @@ window.fetch = async function (resource, options = {}) {
     }
   }
 
-  // 16. SQL LOGS
+  // 16. SQL LOGS (Supports GET and DELETE)
   if (pathname === '/api/sql-logs') {
+    if (method === 'DELETE') {
+      store.sqlLogs = [];
+      saveStore(store);
+      return jsonResponse({ success: true, message: 'Logs cleared.' });
+    }
     return jsonResponse(store.sqlLogs || []);
   }
 
