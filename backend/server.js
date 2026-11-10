@@ -65,6 +65,13 @@ async function startServer() {
   const connected = await db.initOracle();
   if (connected) {
     console.log('📦 Database Mode: Oracle 11g XE [ONLINE]');
+    try {
+      const { spawn } = require('child_process');
+      const syncProc = spawn('node', ['sync_to_oracle.js'], { stdio: 'inherit' });
+      syncProc.on('close', () => {
+        console.log('⚡ Automatic cloud sync completed on boot.\n');
+      });
+    } catch (e) {}
   } else {
     console.log('📦 Database Mode: In-Memory (Oracle Offline - Seamless Fallback)');
     console.log('⚡ All 11 ER Entities loaded with Indian-context realistic mock data.');
