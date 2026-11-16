@@ -804,6 +804,61 @@ window.fetch = async function (resource, options = {}) {
       priority_level: 'High'
     };
     store.cases.unshift(newCase);
+
+    // Auto-generate Digital Device for the complaint
+    const newDevId = Date.now();
+    store.devices = store.devices || [];
+    store.devices.push({
+      device_id: newDevId,
+      case_id: caseId,
+      device_type: ctId === 4 ? 'Laptop' : 'Mobile Phone',
+      brand: ctId === 2 ? 'Apple' : 'Samsung',
+      model: ctId === 2 ? 'iPhone 14 Pro' : 'Galaxy S23 5G',
+      serial_no: 'SM-IND-' + caseId,
+      mac_address: '9C:B6:D0:14:8A:' + (caseId % 99),
+      operating_system: ctId === 2 ? 'iOS 17' : 'Android 14'
+    });
+
+    // Auto-generate 2 Forensic Evidence records for the complaint
+    store.evidence = store.evidence || [];
+    store.evidence.push({
+      evidence_id: Date.now() + 1,
+      case_id: caseId,
+      device_id: newDevId,
+      evidence_type: ctId === 1 ? 'Bank Statement & UPI Debit Logs' : (ctId === 2 ? 'Deepfake Morphed Video Forensics' : 'WhatsApp Phishing Chat Export'),
+      file_hash: 'SHA256: 7d4a9f82bc103982e01614798cba991048' + (caseId % 99),
+      file_size: ctId === 2 ? '48.2 MB' : '4.8 MB',
+      collection_date: today,
+      ip_address: '103.241.136.' + ((caseId % 250) + 1),
+      storage_location: `/evidence_vault/${caseId}/primary_artifact_${caseId}.bin`
+    });
+
+    store.evidence.push({
+      evidence_id: Date.now() + 2,
+      case_id: caseId,
+      device_id: newDevId,
+      evidence_type: 'Mule Account Beneficiary KYC Dossier',
+      file_hash: 'SHA256: e3b0c44298fc1c149afbf4c8996fb92427' + (caseId % 99),
+      file_size: '1.6 MB',
+      collection_date: today,
+      ip_address: '49.36.128.' + ((caseId % 250) + 1),
+      storage_location: `/evidence_vault/${caseId}/cdr_network_telecom_log.pdf`
+    });
+
+    // Auto-generate Suspect
+    store.suspects = store.suspects || [];
+    store.suspects.push({
+      suspect_id: Date.now() + 3,
+      case_id: caseId,
+      name: 'Imran Qureshi (Mule Account Operator)',
+      phone: '9102837465',
+      account_no: '50100482910482 (HDFC Bank)',
+      city: 'Mumbai',
+      state: 'Maharashtra',
+      arrest_status: 'Under Investigation',
+      notes: 'Mule bank account holder flagged by 1930 nodal monitoring unit.'
+    });
+
     saveStore(store);
 
     logSql('INSERT', `INSERT INTO CYBER_CRIME_CASE (CASE_ID, VICTIM_ID, INVESTIGATOR_ID, CASE_TITLE) VALUES (${caseId}, ${newCase.victim_id}, ${chosenInvId}, '${body.case_title}')`, {}, 'CYBER_CRIME_CASE');

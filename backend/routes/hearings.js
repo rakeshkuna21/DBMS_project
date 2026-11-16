@@ -110,6 +110,23 @@ router.post('/', async (req, res) => {
       court_room_no: newHearing.court_room_no
     }, db.isOracleConnected() ? 'oracle' : 'in-memory', 'CASE_HEARING');
 
+    if (db.isOracleConnected()) {
+      try {
+        await db.query(sql, {
+          case_id: numCaseId,
+          hearing_no: hearingNo,
+          court_id: newHearing.court_id,
+          hearing_date,
+          hearing_status: newHearing.hearing_status,
+          verdict: newHearing.verdict,
+          judge_name: newHearing.judge_name,
+          court_room_no: newHearing.court_room_no
+        });
+      } catch (oraH) {
+        console.warn('Oracle Hearing insert note:', oraH.message);
+      }
+    }
+
     res.status(201).json({
       success: true,
       hearing_no: hearingNo,

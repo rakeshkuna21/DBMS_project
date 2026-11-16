@@ -91,6 +91,23 @@ router.post('/', async (req, res) => {
       storage_location: newEvidence.storage_location
     }, db.isOracleConnected() ? 'oracle' : 'in-memory', 'EVIDENCE');
 
+    if (db.isOracleConnected()) {
+      try {
+        await db.query(sql, {
+          evidence_id: evidenceId,
+          case_id: newEvidence.case_id,
+          device_id: newEvidence.device_id,
+          evidence_type,
+          file_hash: newEvidence.file_hash,
+          file_size: newEvidence.file_size,
+          ip_address: newEvidence.ip_address,
+          storage_location: newEvidence.storage_location
+        });
+      } catch (oraE) {
+        console.warn('Oracle Evidence insert note:', oraE.message);
+      }
+    }
+
     res.status(201).json({
       success: true,
       evidence_id: evidenceId,

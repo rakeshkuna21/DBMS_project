@@ -1,4 +1,4 @@
-// sync_to_oracle.js - Synchronize 24/7 Cloud Filed Cases & Signups into Local Oracle Express 11g
+// sync_to_oracle.js - Synchronize 24/7 Cloud Filed Cases, Signups, Evidence & Hearings into Local Oracle Express 11g
 // National Cyber Crime Reporting & Management Portal
 // Schema: EAC_24037_RAKESH | Ministry of Home Affairs
 
@@ -9,8 +9,8 @@ const KV_USERS_URL = 'https://kvdb.io/2uN783pLc6vQynyUCStLdk/nccms_cloud_users';
 
 async function runSync() {
   console.log('====================================================================');
-  console.log('  🏛️  ORACLE 11g LIVE DATA SYNCHRONIZATION WORKER');
-  console.log('  Target Schema: EAC_24037_RAKESH | Database: Oracle Express 11g XE');
+  console.log('  🏛️  NATIONAL CYBER CRIME PORTAL - ORACLE 11g LIVE SYNC ENGINE');
+  console.log('  Schema: EAC_24037_RAKESH | Database: Oracle Express 11g XE');
   console.log('====================================================================\n');
 
   // 1. Fetch from Cloud Relays
@@ -52,7 +52,28 @@ async function runSync() {
     process.exit(1);
   }
 
-  // 3. Sync Pure Signups into LOGIN and VICTIM
+  // 3. Ensure Designated Cyber Crime Courts (1 to 5) exist in COURT table
+  console.log('🏛️ 2. Verifying Designated Cyber Crime Courts...');
+  const courts = [
+    { id: 1, name: 'Special Cyber Crime Sessions Court, Patiala House', type: 'Sessions Court', loc: 'New Delhi, Delhi', ph: '011-23384521' },
+    { id: 2, name: 'Special Cyber Crime Court, Esplanade Court Complex', type: 'Sessions Court', loc: 'Mumbai, Maharashtra', ph: '022-22620144' },
+    { id: 3, name: 'City Civil & Sessions Cyber Court', type: 'Sessions Court', loc: 'Bengaluru, Karnataka', ph: '080-22211100' },
+    { id: 4, name: 'Metropolitan Sessions Court (Cyber Division)', type: 'Sessions Court', loc: 'Hyderabad, Telangana', ph: '040-23445500' },
+    { id: 5, name: 'Metropolitan Magistrate Cyber Crime Court, Egmore', type: 'Magistrate Court', loc: 'Chennai, Tamil Nadu', ph: '044-28190033' }
+  ];
+
+  for (const c of courts) {
+    const chk = await conn.execute('SELECT COUNT(*) FROM COURT WHERE COURT_ID = :id', { id: c.id });
+    if (chk.rows[0][0] === 0) {
+      await conn.execute(
+        'INSERT INTO COURT (COURT_ID, COURT_NAME, COURT_TYPE, LOCATION, CONTACT_NO) VALUES (:id, :name, :type, :loc, :ph)',
+        { id: c.id, name: c.name, type: c.type, loc: c.loc, ph: c.ph }
+      );
+    }
+  }
+
+  // 4. Sync Pure Signups into LOGIN and VICTIM
+  console.log('\n👥 3. Synchronizing Registered Citizens into LOGIN & VICTIM...');
   let syncedUsersCount = 0;
   for (const u of cloudUsers) {
     const phone = u.phone ? String(u.phone).trim() : '';
@@ -87,19 +108,16 @@ async function runSync() {
         { fn: firstName, ln: lastName, email, phone, city, state, pin: pincode }
       );
       syncedUsersCount++;
-      console.log(`  ✓ Synced Registered Citizen: "${firstName} ${lastName}" (Phone: ${phone}) into Oracle 11g`);
-    } catch (insErr) {
-      // Continue smoothly
-    }
+      console.log(`  ✓ Synced Citizen: "${firstName} ${lastName}" (Phone: ${phone}) into LOGIN & VICTIM`);
+    } catch (insErr) {}
   }
 
-  // 4. Sync Cases into Oracle 11g
+  // 5. Sync Cases into Oracle 11g
+  console.log('\n📋 4. Synchronizing Cyber Crime Complaints...');
   let syncedCount = 0;
   let updatedCasesCount = 0;
-  let syncedHearingsCount = 0;
 
   for (const c of cloudCases) {
-    // Check if case title already exists in Oracle
     const checkRes = await conn.execute(
       'SELECT CASE_ID, CASE_STATUS FROM CYBER_CRIME_CASE WHERE CASE_TITLE = :title',
       { title: c.case_title }
@@ -111,17 +129,15 @@ async function runSync() {
       targetCaseId = checkRes.rows[0][0];
       const existingStatus = checkRes.rows[0][1];
 
-      // Update case status if changed in cloud (e.g. police marked 'In Court')
       if (c.case_status && c.case_status !== existingStatus) {
         await conn.execute(
           'UPDATE CYBER_CRIME_CASE SET CASE_STATUS = :st, PRIORITY_LEVEL = :pr WHERE CASE_ID = :cid',
           { st: c.case_status, pr: c.priority_level || 'High', cid: targetCaseId }
         );
         updatedCasesCount++;
-        console.log(`  ↻ Updated Case #${targetCaseId} Status to "${c.case_status}" in Oracle 11g`);
+        console.log(`  ↻ Updated Case #${targetCaseId} Status to "${c.case_status}"`);
       }
     } else {
-      // Determine / create Victim
       let victimId = 1;
       const vic = c.victim;
       const phone = vic?.phone || '9876543210';
@@ -132,7 +148,6 @@ async function runSync() {
       const state = vic?.state || 'Karnataka';
       const pincode = vic?.pincode || '560001';
 
-      // Check existing victim
       const vicCheck = await conn.execute(
         'SELECT VICTIM_ID FROM VICTIM WHERE PHONE = :phone',
         { phone }
@@ -162,7 +177,6 @@ async function runSync() {
         }
       }
 
-      // Insert Case into CYBER_CRIME_CASE
       const ctId = c.crime_type_id || 1;
       let invId = c.investigator_id || 1;
       if (ctId === 1) invId = 8;
@@ -203,67 +217,164 @@ async function runSync() {
       }
 
       syncedCount++;
-      console.log(`  ✓ Synced Case: "${c.case_title}" -> Assigned to Officer #${invId} in Oracle 11g`);
+      console.log(`  ✓ Synced Case: "${c.case_title}" -> Assigned to Officer #${invId}`);
+    }
+  }
+
+  // 6. Ensure EVERY case in CYBER_CRIME_CASE has Digital Device, Evidence, Suspect, and Case Hearing
+  console.log('\n🔬 5. Verifying & Enriching Evidence, Devices, Hearings & Suspects for all cases...');
+  const allCasesRes = await conn.execute('SELECT CASE_ID, CRIME_TYPE_ID, CASE_TITLE, CASE_STATUS FROM CYBER_CRIME_CASE ORDER BY CASE_ID ASC');
+  const caseList = allCasesRes.rows;
+
+  const deviceSpecs = [
+    { type: 'Mobile Phone', brand: 'Samsung', model: 'Galaxy S23 5G', serial: 'SM-S911B-IND', mac: '9C:B6:D0:14:8A:3E', os: 'Android 14' },
+    { type: 'Mobile Phone', brand: 'Apple', model: 'iPhone 14 Pro', serial: 'APL-14P-9821', mac: 'F4:D4:88:5A:21:BC', os: 'iOS 17.4' },
+    { type: 'Laptop', brand: 'Dell', model: 'Inspiron 15', serial: 'DL-INSP-2024-X', mac: '00:1A:2B:3C:4D:5E', os: 'Windows 11 Pro' },
+    { type: 'Mobile Phone', brand: 'OnePlus', model: 'OnePlus 11 5G', serial: '1P-11-IND-4829', mac: 'E0:DC:FF:33:12:9A', os: 'OxygenOS 14' }
+  ];
+
+  let devicesAdded = 0;
+  let evidenceAdded = 0;
+  let hearingsAdded = 0;
+  let suspectsAdded = 0;
+
+  for (let i = 0; i < caseList.length; i++) {
+    const [caseId, crimeTypeId, caseTitle, caseStatus] = caseList[i];
+
+    // A. Digital Device
+    let deviceId;
+    const devChk = await conn.execute('SELECT DEVICE_ID FROM DIGITAL_DEVICE WHERE CASE_ID = :cid', { cid: caseId });
+    if (devChk.rows.length === 0) {
+      const devSpec = deviceSpecs[i % deviceSpecs.length];
+      const seqDev = await conn.execute('SELECT SEQ_DEVICE_ID.NEXTVAL FROM DUAL');
+      deviceId = seqDev.rows[0][0];
+
+      await conn.execute(
+        `INSERT INTO DIGITAL_DEVICE (DEVICE_ID, CASE_ID, DEVICE_TYPE, BRAND, MODEL, SERIAL_NO, MAC_ADDRESS, OPERATING_SYSTEM)
+         VALUES (:did, :cid, :dtype, :brand, :model, :serial, :mac, :os)`,
+        { did: deviceId, cid: caseId, dtype: devSpec.type, brand: devSpec.brand, model: devSpec.model, serial: devSpec.serial, mac: devSpec.mac, os: devSpec.os }
+      );
+      devicesAdded++;
+    } else {
+      deviceId = devChk.rows[0][0];
     }
 
-    // 5. If Case is "In Court", ensure hearing exists in Oracle CASE_HEARING table!
-    if (targetCaseId && (c.case_status || '').toLowerCase().trim() === 'in court') {
-      const hCheck = await conn.execute(
-        'SELECT COUNT(*) FROM CASE_HEARING WHERE CASE_ID = :cid',
-        { cid: targetCaseId }
+    // B. Forensic Evidence (2 records per case)
+    const evChk = await conn.execute('SELECT COUNT(*) FROM EVIDENCE WHERE CASE_ID = :cid', { cid: caseId });
+    if (evChk.rows[0][0] === 0) {
+      const isFin = crimeTypeId === 1 || String(caseTitle).toLowerCase().includes('bank') || String(caseTitle).toLowerCase().includes('rupees');
+      const isSoc = crimeTypeId === 2 || String(caseTitle).toLowerCase().includes('fake') || String(caseTitle).toLowerCase().includes('blackmail');
+
+      const ev1 = {
+        type: isFin ? 'Bank Account Statement & UTR Debit Log' : (isSoc ? 'Deepfake Morphed Video Forensic Report' : 'WhatsApp Phishing Chat Logs'),
+        hash: 'SHA256: 7d4a9f82bc103982e01614798cba991048' + (caseId % 99),
+        size: isFin ? '4.8 MB' : '48.2 MB',
+        ip: '103.241.136.' + ((caseId % 250) + 1),
+        loc: `/evidence_vault/${caseId}/primary_forensic_artifact_${caseId}.bin`
+      };
+
+      const ev2 = {
+        type: isFin ? 'Mule Account Beneficiary KYC Dossier' : 'IP Trace & Telecom Subscriber CDR Log',
+        hash: 'SHA256: e3b0c44298fc1c149afbf4c8996fb92427' + (caseId % 99),
+        size: '1.6 MB',
+        ip: '49.36.128.' + ((caseId % 250) + 1),
+        loc: `/evidence_vault/${caseId}/cdr_network_telecom_log.pdf`
+      };
+
+      const seqEv1 = await conn.execute('SELECT SEQ_EVIDENCE_ID.NEXTVAL FROM DUAL');
+      const ev1Id = seqEv1.rows[0][0];
+      await conn.execute(
+        `INSERT INTO EVIDENCE (EVIDENCE_ID, CASE_ID, DEVICE_ID, EVIDENCE_TYPE, FILE_HASH, FILE_SIZE, COLLECTION_DATE, IP_ADDRESS, STORAGE_LOCATION)
+         VALUES (:eid, :cid, :did, :etype, :hash, :fsize, SYSDATE - 2, :ip, :loc)`,
+        { eid: ev1Id, cid: caseId, did: deviceId, etype: ev1.type, hash: ev1.hash, fsize: ev1.size, ip: ev1.ip, loc: ev1.loc }
       );
-      if (hCheck.rows && hCheck.rows[0][0] === 0) {
-        try {
-          await conn.execute(
-            `INSERT INTO CASE_HEARING (
-              CASE_ID, HEARING_NO, COURT_ID, HEARING_DATE, HEARING_STATUS, VERDICT, NEXT_HEARING_DATE, JUDGE_NAME, COURT_ROOM_NO
-            ) VALUES (
-              :cid, 1, 3, SYSDATE + 7, 'Scheduled', 
-              'Charge Sheet submitted by Police. Bank freeze order issued under Sec 66D IT Act.', 
-              SYSDATE + 21, 'Hon. Special Magistrate K. Ramanathan', 'Court Hall No. 3'
-            )`,
-            { cid: targetCaseId }
-          );
-          syncedHearingsCount++;
-          console.log(`  ⚖️ Synced Court Hearing for Case #${targetCaseId} (Status: In Court) into Oracle 11g CASE_HEARING`);
-        } catch (hErr) {
-          console.warn('  ⚠️ Hearing sync note:', hErr.message);
-        }
-      }
+      evidenceAdded++;
+
+      const seqEv2 = await conn.execute('SELECT SEQ_EVIDENCE_ID.NEXTVAL FROM DUAL');
+      const ev2Id = seqEv2.rows[0][0];
+      await conn.execute(
+        `INSERT INTO EVIDENCE (EVIDENCE_ID, CASE_ID, DEVICE_ID, EVIDENCE_TYPE, FILE_HASH, FILE_SIZE, COLLECTION_DATE, IP_ADDRESS, STORAGE_LOCATION)
+         VALUES (:eid, :cid, :did, :etype, :hash, :fsize, SYSDATE - 1, :ip, :loc)`,
+        { eid: ev2Id, cid: caseId, did: deviceId, etype: ev2.type, hash: ev2.hash, fsize: ev2.size, ip: ev2.ip, loc: ev2.loc }
+      );
+      evidenceAdded++;
+    }
+
+    // C. Suspect
+    const suspChk = await conn.execute('SELECT COUNT(*) FROM SUSPECT WHERE CASE_ID = :cid', { cid: caseId });
+    if (suspChk.rows[0][0] === 0) {
+      const seqSusp = await conn.execute('SELECT SEQ_SUSPECT_ID.NEXTVAL FROM DUAL');
+      const suspId = seqSusp.rows[0][0];
+
+      const suspectNames = ['Imran Qureshi (Mule Account Operator)', 'Arjun Malhotra (@darknet_rex)', 'Pooja Deshmukh', 'Rajesh Srivastav'];
+      const cities = ['Mumbai', 'Noida', 'Pune', 'Jamtara'];
+      const states = ['Maharashtra', 'Uttar Pradesh', 'Maharashtra', 'Jharkhand'];
+      const statuses = ['Arrested', 'Absconding', 'Under Surveillance', 'Arrested'];
+      const sIdx = i % suspectNames.length;
+
+      await conn.execute(
+        `INSERT INTO SUSPECT (
+          SUSPECT_ID, CASE_ID, NAME, GENDER, CRIMINAL_HISTORY, STREET, CITY, STATE, PINCODE, PHONE, EMAIL, INVOLVEMENT_TYPE, ARREST_STATUS, CHARGES
+        ) VALUES (
+          :sid, :cid, :name, 'Male', 'Prior Cyber Cell Records in Jamtara/Mule Ring', '14 Ring Road', :city, :state, '400051', '9102837465', 'suspect@darkmail.com', 'Primary Accused', :astatus, 'IT Act Sec 66C, 66D & IPC 420'
+        )`,
+        { sid: suspId, cid: caseId, name: suspectNames[sIdx], city: cities[sIdx], state: states[sIdx], astatus: statuses[sIdx] }
+      );
+      suspectsAdded++;
+    }
+
+    // D. Case Hearing
+    const hChk = await conn.execute('SELECT COUNT(*) FROM CASE_HEARING WHERE CASE_ID = :cid', { cid: caseId });
+    if (hChk.rows[0][0] === 0) {
+      const courtId = (i % 5) + 1;
+      const verdict = caseStatus === 'In Court'
+        ? 'Charge Sheet submitted by Police. Bank freeze order under Sec 66D IT Act issued to beneficiary bank.'
+        : 'Cognizance taken on Police Investigation Report. Summons issued to intermediary service provider.';
+
+      await conn.execute(
+        `INSERT INTO CASE_HEARING (
+          CASE_ID, HEARING_NO, COURT_ID, HEARING_DATE, HEARING_STATUS, VERDICT, NEXT_HEARING_DATE, JUDGE_NAME, COURT_ROOM_NO
+        ) VALUES (
+          :cid, 1, :courtId, SYSDATE + 7, 'Scheduled', :verdict, SYSDATE + 21, 'Hon. Special Magistrate K. Ramanathan', 'Court Hall No. 3'
+        )`,
+        { cid: caseId, courtId: courtId, verdict: verdict }
+      );
+      hearingsAdded++;
     }
   }
 
   await conn.commit();
 
-  // Print Database Status
+  // 7. Verification Counts
   const vCnt = await conn.execute('SELECT COUNT(*) FROM VICTIM');
   const cCnt = await conn.execute('SELECT COUNT(*) FROM CYBER_CRIME_CASE');
-  const iCnt = await conn.execute('SELECT COUNT(*) FROM INVESTIGATOR');
+  const eCnt = await conn.execute('SELECT COUNT(*) FROM EVIDENCE');
   const hCnt = await conn.execute('SELECT COUNT(*) FROM CASE_HEARING');
+  const dCnt = await conn.execute('SELECT COUNT(*) FROM DIGITAL_DEVICE');
+  const sCnt = await conn.execute('SELECT COUNT(*) FROM SUSPECT');
+  const ctCnt = await conn.execute('SELECT COUNT(*) FROM COURT');
+  const iCnt = await conn.execute('SELECT COUNT(*) FROM INVESTIGATOR');
+  const lCnt = await conn.execute('SELECT COUNT(*) FROM LOGIN');
 
   console.log('\n====================================================================');
-  console.log('  📊 SYNCHRONIZATION RESULTS');
+  console.log('  📊 ORACLE 11g DATABASE LIVE SYNCHRONIZATION RESULTS');
   console.log('====================================================================');
-  console.log(`  Newly Synced Citizens      : ${syncedUsersCount}`);
-  console.log(`  Newly Synced Complaints    : ${syncedCount}`);
-  console.log(`  Updated Case Statuses      : ${updatedCasesCount}`);
-  console.log(`  Synced Court Hearings      : ${syncedHearingsCount}`);
-  console.log(`  Total Citizens in Oracle   : ${vCnt.rows[0][0]}`);
-  console.log(`  Total Cases in Oracle      : ${cCnt.rows[0][0]}`);
-  console.log(`  Total Hearings in Oracle   : ${hCnt.rows[0][0]}`);
-  console.log(`  Total Officers in Oracle   : ${iCnt.rows[0][0]}`);
+  console.log(`  EVIDENCE Rows in Oracle        : ${eCnt.rows[0][0]}`);
+  console.log(`  CASE_HEARING Rows in Oracle    : ${hCnt.rows[0][0]}`);
+  console.log(`  DIGITAL_DEVICE Rows in Oracle  : ${dCnt.rows[0][0]}`);
+  console.log(`  SUSPECT Rows in Oracle         : ${sCnt.rows[0][0]}`);
+  console.log(`  CYBER_CRIME_CASE Rows in Oracle: ${cCnt.rows[0][0]}`);
+  console.log(`  COURT Rows in Oracle           : ${ctCnt.rows[0][0]}`);
+  console.log(`  VICTIM (Citizens) in Oracle    : ${vCnt.rows[0][0]}`);
+  console.log(`  LOGIN Records in Oracle        : ${lCnt.rows[0][0]}`);
+  console.log(`  INVESTIGATOR Officers in Oracle: ${iCnt.rows[0][0]}`);
   console.log('====================================================================');
-  console.log('====================================================================');
-  console.log(`  Newly Synced Citizens      : ${syncedUsersCount}`);
-  console.log(`  Newly Synced Complaints    : ${syncedCount}`);
-  console.log(`  Already Existing (Skipped) : ${skippedCount}`);
-  console.log(`  Total Citizens in Oracle   : ${vCnt.rows[0][0]}`);
-  console.log(`  Total Cases in Oracle      : ${cCnt.rows[0][0]}`);
-  console.log(`  Total Officers in Oracle   : ${iCnt.rows[0][0]}`);
-  console.log('====================================================================');
-  console.log('✨ Data is live in Oracle Express 11g! Ready to show to Mam in APEX/SQL*Plus.\n');
+  console.log('✨ Data is live in Oracle Express 11g! Ready for your live demonstration in APEX!\n');
 
   await conn.close();
 }
 
-runSync();
+runSync().catch(err => {
+  console.error('Sync failed:', err);
+  process.exit(1);
+});
