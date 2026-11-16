@@ -88,6 +88,25 @@ export default function InvestigatorDashboard({
         })
       });
 
+      if (newStatus === 'In Court') {
+        try {
+          await fetch('/api/hearings', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              case_id: c.case_id,
+              court_id: 3,
+              hearing_date: new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0],
+              hearing_status: 'Scheduled',
+              judge_name: 'Hon. Special Magistrate K. Ramanathan',
+              court_room_no: 'Court Hall No. 3 (Cyber Division)',
+              verdict: 'Charge Sheet filed under Sec 66D IT Act. Bank freeze notice issued.',
+              next_hearing_date: new Date(Date.now() + 21 * 86400000).toISOString().split('T')[0]
+            })
+          });
+        } catch (hErr) {}
+      }
+
       if (res.ok) {
         setSaveStatus(prev => ({ ...prev, [c.case_id]: 'saved' }));
         setTimeout(() => {

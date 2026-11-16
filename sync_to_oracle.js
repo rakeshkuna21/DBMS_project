@@ -95,93 +95,142 @@ async function runSync() {
 
   // 4. Sync Cases into Oracle 11g
   let syncedCount = 0;
-  let skippedCount = 0;
+  let updatedCasesCount = 0;
+  let syncedHearingsCount = 0;
 
   for (const c of cloudCases) {
     // Check if case title already exists in Oracle
     const checkRes = await conn.execute(
-      'SELECT CASE_ID FROM CYBER_CRIME_CASE WHERE CASE_TITLE = :title',
+      'SELECT CASE_ID, CASE_STATUS FROM CYBER_CRIME_CASE WHERE CASE_TITLE = :title',
       { title: c.case_title }
     );
 
+    let targetCaseId;
+
     if (checkRes.rows && checkRes.rows.length > 0) {
-      skippedCount++;
-      continue;
-    }
+      targetCaseId = checkRes.rows[0][0];
+      const existingStatus = checkRes.rows[0][1];
 
-    // Determine / create Victim
-    let victimId = 1;
-    const vic = c.victim;
-    const phone = vic?.phone || '9876543210';
-    const email = vic?.email || 'citizen@cybercrime.gov.in';
-    const firstName = vic?.first_name || 'Citizen';
-    const lastName = vic?.last_name || 'Complainant';
-    const city = vic?.city || 'Bengaluru';
-    const state = vic?.state || 'Karnataka';
-    const pincode = vic?.pincode || '560001';
-
-    // Check existing victim
-    const vicCheck = await conn.execute(
-      'SELECT VICTIM_ID FROM VICTIM WHERE PHONE = :phone',
-      { phone }
-    );
-
-    if (vicCheck.rows && vicCheck.rows.length > 0) {
-      victimId = vicCheck.rows[0][0];
+      // Update case status if changed in cloud (e.g. police marked 'In Court')
+      if (c.case_status && c.case_status !== existingStatus) {
+        await conn.execute(
+          'UPDATE CYBER_CRIME_CASE SET CASE_STATUS = :st, PRIORITY_LEVEL = :pr WHERE CASE_ID = :cid',
+          { st: c.case_status, pr: c.priority_level || 'High', cid: targetCaseId }
+        );
+        updatedCasesCount++;
+        console.log(`  ↻ Updated Case #${targetCaseId} Status to "${c.case_status}" in Oracle 11g`);
+      }
     } else {
-      await conn.execute(
-        `INSERT INTO LOGIN (USER_ID, MOBILE_NUMBER, EMAIL, ROLE, ACTIVE_OTP, OTP_VERIFIED) 
-         VALUES (SEQ_USER_ID.NEXTVAL, :phone, :email, 'Victim', '482910', 'YES')`,
-        { phone, email }
-      );
+      // Determine / create Victim
+      let victimId = 1;
+      const vic = c.victim;
+      const phone = vic?.phone || '9876543210';
+      const email = vic?.email || 'citizen@cybercrime.gov.in';
+      const firstName = vic?.first_name || 'Citizen';
+      const lastName = vic?.last_name || 'Complainant';
+      const city = vic?.city || 'Bengaluru';
+      const state = vic?.state || 'Karnataka';
+      const pincode = vic?.pincode || '560001';
 
-      await conn.execute(
-        `INSERT INTO VICTIM (VICTIM_ID, USER_ID, FIRST_NAME, LAST_NAME, DOB, GENDER, EMAIL, PHONE, STREET, CITY, STATE, PINCODE)
-         VALUES (SEQ_VICTIM_ID.NEXTVAL, SEQ_USER_ID.CURRVAL, :fn, :ln, TO_DATE('1995-01-01', 'YYYY-MM-DD'), 'Male', :email, :phone, '12 Main St', :city, :state, :pin)`,
-        { fn: firstName, ln: lastName, email, phone, city, state, pin: pincode }
-      );
-
-      const newVicRes = await conn.execute(
+      // Check existing victim
+      const vicCheck = await conn.execute(
         'SELECT VICTIM_ID FROM VICTIM WHERE PHONE = :phone',
         { phone }
       );
-      if (newVicRes.rows && newVicRes.rows.length > 0) {
-        victimId = newVicRes.rows[0][0];
+
+      if (vicCheck.rows && vicCheck.rows.length > 0) {
+        victimId = vicCheck.rows[0][0];
+      } else {
+        await conn.execute(
+          `INSERT INTO LOGIN (USER_ID, MOBILE_NUMBER, EMAIL, ROLE, ACTIVE_OTP, OTP_VERIFIED) 
+           VALUES (SEQ_USER_ID.NEXTVAL, :phone, :email, 'Victim', '482910', 'YES')`,
+          { phone, email }
+        );
+
+        await conn.execute(
+          `INSERT INTO VICTIM (VICTIM_ID, USER_ID, FIRST_NAME, LAST_NAME, DOB, GENDER, EMAIL, PHONE, STREET, CITY, STATE, PINCODE)
+           VALUES (SEQ_VICTIM_ID.NEXTVAL, SEQ_USER_ID.CURRVAL, :fn, :ln, TO_DATE('1995-01-01', 'YYYY-MM-DD'), 'Male', :email, :phone, '12 Main St', :city, :state, :pin)`,
+          { fn: firstName, ln: lastName, email, phone, city, state, pin: pincode }
+        );
+
+        const newVicRes = await conn.execute(
+          'SELECT VICTIM_ID FROM VICTIM WHERE PHONE = :phone',
+          { phone }
+        );
+        if (newVicRes.rows && newVicRes.rows.length > 0) {
+          victimId = newVicRes.rows[0][0];
+        }
       }
+
+      // Insert Case into CYBER_CRIME_CASE
+      const ctId = c.crime_type_id || 1;
+      let invId = c.investigator_id || 1;
+      if (ctId === 1) invId = 8;
+      else if (ctId === 2) invId = 19;
+      else if (ctId === 3) invId = 15;
+      else if (ctId === 4) invId = 25;
+      else invId = 1;
+
+      const incDate = c.incident_date || new Date().toISOString().split('T')[0];
+
+      await conn.execute(
+        `INSERT INTO CYBER_CRIME_CASE (
+          CASE_ID, VICTIM_ID, INVESTIGATOR_ID, CRIME_TYPE_ID, CASE_TITLE, INCIDENT_DATE, 
+          REPORTED_DATE, COMPLAINT_MODE, DESCRIPTION, CASE_STATUS, PRIORITY_LEVEL, ASSIGNED_DATE
+        ) VALUES (
+          SEQ_CASE_ID.NEXTVAL, :vicId, :invId, :ctId, :cTitle, 
+          TO_DATE(:incDate, 'YYYY-MM-DD'), SYSDATE, :cMode, :cDesc, :cStatus, :cPriority, SYSDATE
+        )`,
+        {
+          vicId: victimId,
+          invId: invId,
+          ctId: ctId,
+          cTitle: c.case_title,
+          incDate: incDate,
+          cMode: c.complaint_mode || 'Online Portal',
+          cDesc: c.description || 'Online fraud incident reported through National Cyber Crime Portal.',
+          cStatus: c.case_status || 'Under Investigation',
+          cPriority: c.priority_level || 'High'
+        }
+      );
+
+      const insertedRes = await conn.execute(
+        'SELECT CASE_ID FROM CYBER_CRIME_CASE WHERE CASE_TITLE = :title',
+        { title: c.case_title }
+      );
+      if (insertedRes.rows && insertedRes.rows.length > 0) {
+        targetCaseId = insertedRes.rows[0][0];
+      }
+
+      syncedCount++;
+      console.log(`  ✓ Synced Case: "${c.case_title}" -> Assigned to Officer #${invId} in Oracle 11g`);
     }
 
-    // Insert Case into CYBER_CRIME_CASE
-    const ctId = c.crime_type_id || 1;
-    let invId = c.investigator_id || 1;
-    if (ctId === 1) invId = 8;
-    else if (ctId === 2) invId = 19;
-    else if (ctId === 3) invId = 15;
-    else if (ctId === 4) invId = 25;
-    else invId = 1;
-
-    const incDate = c.incident_date || new Date().toISOString().split('T')[0];
-
-    await conn.execute(
-      `INSERT INTO CYBER_CRIME_CASE (
-        CASE_ID, VICTIM_ID, INVESTIGATOR_ID, CRIME_TYPE_ID, CASE_TITLE, INCIDENT_DATE, 
-        REPORTED_DATE, COMPLAINT_MODE, DESCRIPTION, CASE_STATUS, PRIORITY_LEVEL, ASSIGNED_DATE
-      ) VALUES (
-        SEQ_CASE_ID.NEXTVAL, :vicId, :invId, :ctId, :cTitle, 
-        TO_DATE(:incDate, 'YYYY-MM-DD'), SYSDATE, :cMode, :cDesc, 'Under Investigation', 'High', SYSDATE
-      )`,
-      {
-        vicId: victimId,
-        invId: invId,
-        ctId: ctId,
-        cTitle: c.case_title,
-        incDate: incDate,
-        cMode: c.complaint_mode || 'Online Portal',
-        cDesc: c.description || 'Online fraud incident reported through National Cyber Crime Portal.'
+    // 5. If Case is "In Court", ensure hearing exists in Oracle CASE_HEARING table!
+    if (targetCaseId && (c.case_status || '').toLowerCase().trim() === 'in court') {
+      const hCheck = await conn.execute(
+        'SELECT COUNT(*) FROM CASE_HEARING WHERE CASE_ID = :cid',
+        { cid: targetCaseId }
+      );
+      if (hCheck.rows && hCheck.rows[0][0] === 0) {
+        try {
+          await conn.execute(
+            `INSERT INTO CASE_HEARING (
+              CASE_ID, HEARING_NO, COURT_ID, HEARING_DATE, HEARING_STATUS, VERDICT, NEXT_HEARING_DATE, JUDGE_NAME, COURT_ROOM_NO
+            ) VALUES (
+              :cid, 1, 3, SYSDATE + 7, 'Scheduled', 
+              'Charge Sheet submitted by Police. Bank freeze order issued under Sec 66D IT Act.', 
+              SYSDATE + 21, 'Hon. Special Magistrate K. Ramanathan', 'Court Hall No. 3'
+            )`,
+            { cid: targetCaseId }
+          );
+          syncedHearingsCount++;
+          console.log(`  ⚖️ Synced Court Hearing for Case #${targetCaseId} (Status: In Court) into Oracle 11g CASE_HEARING`);
+        } catch (hErr) {
+          console.warn('  ⚠️ Hearing sync note:', hErr.message);
+        }
       }
-    );
-
-    syncedCount++;
-    console.log(`  ✓ Synced Case: "${c.case_title}" -> Assigned to Officer #${invId} in Oracle 11g`);
+    }
   }
 
   await conn.commit();
@@ -190,9 +239,20 @@ async function runSync() {
   const vCnt = await conn.execute('SELECT COUNT(*) FROM VICTIM');
   const cCnt = await conn.execute('SELECT COUNT(*) FROM CYBER_CRIME_CASE');
   const iCnt = await conn.execute('SELECT COUNT(*) FROM INVESTIGATOR');
+  const hCnt = await conn.execute('SELECT COUNT(*) FROM CASE_HEARING');
 
   console.log('\n====================================================================');
   console.log('  📊 SYNCHRONIZATION RESULTS');
+  console.log('====================================================================');
+  console.log(`  Newly Synced Citizens      : ${syncedUsersCount}`);
+  console.log(`  Newly Synced Complaints    : ${syncedCount}`);
+  console.log(`  Updated Case Statuses      : ${updatedCasesCount}`);
+  console.log(`  Synced Court Hearings      : ${syncedHearingsCount}`);
+  console.log(`  Total Citizens in Oracle   : ${vCnt.rows[0][0]}`);
+  console.log(`  Total Cases in Oracle      : ${cCnt.rows[0][0]}`);
+  console.log(`  Total Hearings in Oracle   : ${hCnt.rows[0][0]}`);
+  console.log(`  Total Officers in Oracle   : ${iCnt.rows[0][0]}`);
+  console.log('====================================================================');
   console.log('====================================================================');
   console.log(`  Newly Synced Citizens      : ${syncedUsersCount}`);
   console.log(`  Newly Synced Complaints    : ${syncedCount}`);

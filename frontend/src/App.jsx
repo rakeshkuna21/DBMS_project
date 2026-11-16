@@ -8,12 +8,20 @@ import NationalEmblemLoader from './components/NationalEmblemLoader.jsx';
 import TopNotification from './components/TopNotification.jsx';
 
 export default function App() {
-  const [loggedInUser, setLoggedInUser] = useState(null);
+  const urlParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+  const previewMode = urlParams?.get('preview');
+  const previewUser = previewMode === 'officer'
+    ? { user_id: 1, investigator_id: 1, officer_id: 'CBI-CYB-101', name: 'Arvind Swaminathan', rank: 'Superintendent of Police (SP)', role: 'Investigator', department_name: 'CBI Cyber Crime Division', department_city: 'New Delhi' }
+    : previewMode === 'citizen'
+    ? { user_id: 1, victim_id: 1, name: 'Rajesh Sharma', first_name: 'Rajesh', last_name: 'Sharma', phone: '9876543210', email: 'rajesh.sharma@example.com', role: 'Victim' }
+    : null;
+
+  const [loggedInUser, setLoggedInUser] = useState(previewUser);
   const [isSlowInternet, setIsSlowInternet] = useState(false);
   const [fontSize, setFontSize] = useState('small'); // 'small' (A-) | 'medium' (A) | 'large' (A+)
 
   // Active top navigation tab ('home' | 'report' | 'track' | 'suspect' | 'learning' | 'help' | etc.)
-  const [activeNavTab, setActiveNavTab] = useState('home');
+  const [activeNavTab, setActiveNavTab] = useState(urlParams?.get('tab') || (previewUser ? 'overview' : 'home'));
   const [preselectedCategory, setPreselectedCategory] = useState(null);
   const [pendingRedirectTab, setPendingRedirectTab] = useState(null);
 

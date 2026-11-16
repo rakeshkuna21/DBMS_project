@@ -95,10 +95,54 @@ const COURTS = [
 const STORAGE_KEY = 'nccms_inbrowser_db_v3';
 
 function loadStore() {
+  let loaded = null;
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) return JSON.parse(raw);
+    if (raw) loaded = JSON.parse(raw);
   } catch (e) {}
+
+  if (loaded) {
+    // Ensure all cases marked 'In Court' have their hearings scheduled
+    if (Array.isArray(loaded.cases)) {
+      loaded.hearings = loaded.hearings || [];
+      let hearingAdded = false;
+      loaded.cases.forEach(c => {
+        if ((c.case_status || '').toLowerCase().trim() === 'in court') {
+          if (!loaded.hearings.some(h => String(h.case_id) === String(c.case_id))) {
+            const courtIdx = Math.max(0, (Number(c.crime_type_id || 1) - 1) % COURTS.length);
+            const court = COURTS[courtIdx] || COURTS[2] || COURTS[0];
+            const baseDate = c.reported_date ? new Date(c.reported_date) : new Date();
+            const validBase = isNaN(baseDate.getTime()) ? new Date() : baseDate;
+            const hDate = new Date(validBase.getTime() + 7 * 86400000).toISOString().split('T')[0];
+            const nextDate = new Date(validBase.getTime() + 21 * 86400000).toISOString().split('T')[0];
+            loaded.hearings.push({
+              hearing_id: Date.now() + Math.floor(Math.random() * 1000),
+              case_id: c.case_id,
+              hearing_no: 1,
+              court_id: court.court_id,
+              court_name: court.court_name,
+              court_location: `${court.city}, ${court.state}`,
+              court_type: 'Cyber Crime Sessions Court',
+              hearing_date: hDate,
+              hearing_status: 'Scheduled',
+              judge_name: 'Hon. Special Magistrate K. Ramanathan',
+              court_room_no: 'Court Hall No. 3 (Cyber Division)',
+              verdict: 'Charge Sheet submitted by Police under Sec 66D IT Act. Notice issued to Bank Nodal Officer for freeze & restitution.',
+              next_hearing_date: nextDate,
+              remarks: 'Judicial listing for account freeze and victim compensation.'
+            });
+            hearingAdded = true;
+          }
+        }
+      });
+      if (hearingAdded) {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(loaded));
+        } catch (e) {}
+      }
+    }
+    return loaded;
+  }
 
   const investigators = OFFICERS_RAW.map((o, idx) => ({
     investigator_id: idx + 1,
@@ -260,6 +304,64 @@ function logSql(operation, sql, binds, entity) {
 const KV_SYNC_URL = 'https://kvdb.io/2uN783pLc6vQynyUCStLdk/nccms_cloud_cases';
 const KV_USERS_URL = 'https://kvdb.io/2uN783pLc6vQynyUCStLdk/nccms_cloud_users';
 
+// Helper: Ensure a complete court hearing is generated and linked whenever a case is 'In Court'
+function ensureHearingForInCourtCase(caseItem, store) {
+  if (!caseItem || !store) return null;
+  const status = (caseItem.case_status || '').toLowerCase().trim();
+  if (status !== 'in court') return null;
+
+  store.hearings = store.hearings || [];
+  let existing = store.hearings.find(h => String(h.case_id) === String(caseItem.case_id));
+
+  const courtIdx = Math.max(0, (Number(caseItem.crime_type_id || 1) - 1) % COURTS.length);
+  const court = COURTS[courtIdx] || COURTS[2] || COURTS[0];
+  const baseDate = caseItem.reported_date ? new Date(caseItem.reported_date) : new Date();
+  const validBase = isNaN(baseDate.getTime()) ? new Date() : baseDate;
+  const hDate = new Date(validBase.getTime() + 7 * 86400000).toISOString().split('T')[0];
+  const nextDate = new Date(validBase.getTime() + 21 * 86400000).toISOString().split('T')[0];
+
+  if (!existing) {
+    existing = {
+      hearing_id: Date.now() + Math.floor(Math.random() * 1000),
+      case_id: caseItem.case_id,
+      hearing_no: 1,
+      court_id: court.court_id,
+      court_name: court.court_name,
+      court_location: `${court.city}, ${court.state}`,
+      court_type: 'Cyber Crime Sessions Court',
+      hearing_date: hDate,
+      hearing_status: 'Scheduled',
+      judge_name: 'Hon. Special Magistrate K. Ramanathan',
+      court_room_no: 'Court Hall No. 3 (Cyber Division)',
+      verdict: 'Charge Sheet submitted by Police under Sec 66D IT Act. Notice issued to Bank Nodal Officer for freeze & restitution.',
+      next_hearing_date: nextDate,
+      remarks: 'Judicial listing for account freeze and victim compensation.'
+    };
+    store.hearings.push(existing);
+    saveStore(store);
+    logSql(
+      'INSERT',
+      `INSERT INTO CASE_HEARING (CASE_ID, HEARING_NO, COURT_ID, HEARING_DATE, HEARING_STATUS, VERDICT, NEXT_HEARING_DATE, JUDGE_NAME, COURT_ROOM_NO) VALUES (${caseItem.case_id}, 1, ${court.court_id}, TO_DATE('${hDate}', 'YYYY-MM-DD'), 'Scheduled', 'Charge Sheet submitted under Sec 66D IT Act', TO_DATE('${nextDate}', 'YYYY-MM-DD'), 'Hon. Special Magistrate K. Ramanathan', 'Court Hall No. 3')`,
+      {},
+      'CASE_HEARING'
+    );
+  } else {
+    let updated = false;
+    if (!existing.court_name) { existing.court_name = court.court_name; updated = true; }
+    if (!existing.court_location) { existing.court_location = `${court.city}, ${court.state}`; updated = true; }
+    if (!existing.hearing_no) { existing.hearing_no = 1; updated = true; }
+    if (!existing.court_room_no) { existing.court_room_no = 'Court Hall No. 3 (Cyber Division)'; updated = true; }
+    if (!existing.judge_name) { existing.judge_name = 'Hon. Special Magistrate K. Ramanathan'; updated = true; }
+    if (!existing.hearing_date) { existing.hearing_date = hDate; updated = true; }
+    if (!existing.hearing_status) { existing.hearing_status = 'Scheduled'; updated = true; }
+    if (!existing.verdict) { existing.verdict = 'Charge Sheet submitted under Sec 66D IT Act. Notice issued to Bank for fund recovery.'; updated = true; }
+    if (!existing.next_hearing_date) { existing.next_hearing_date = nextDate; updated = true; }
+    if (updated) saveStore(store);
+  }
+
+  return existing;
+}
+
 // Helper: Broadcast case to free cloud sync relay so sync_to_oracle.js on laptop can pull it
 async function relayCaseToCloud(caseData, victimData) {
   try {
@@ -287,6 +389,35 @@ async function relayCaseToCloud(caseData, victimData) {
   } catch (err) {
     // Continue smoothly if offline
   }
+}
+
+// Helper: Update existing case in cloud sync relay when officer changes status or priority
+async function updateCaseInCloud(caseData) {
+  try {
+    let existingList = [];
+    try {
+      const getRes = await originalFetch(KV_SYNC_URL);
+      if (getRes.ok) existingList = await getRes.json();
+    } catch (e) {}
+    if (!Array.isArray(existingList)) existingList = [];
+
+    const idx = existingList.findIndex(item => item.case_id === caseData.case_id || item.case_title === caseData.case_title);
+    if (idx !== -1) {
+      existingList[idx] = {
+        ...existingList[idx],
+        case_status: caseData.case_status,
+        priority_level: caseData.priority_level || existingList[idx].priority_level,
+        investigator_id: caseData.investigator_id || existingList[idx].investigator_id,
+        updated_at: new Date().toISOString()
+      };
+      await originalFetch(KV_SYNC_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(existingList)
+      });
+      console.log('☁️ Case status updated in Cloud Sync Relay to:', caseData.case_status);
+    }
+  } catch (err) {}
 }
 
 // Helper: Broadcast registered citizen to cloud sync relay
@@ -324,13 +455,29 @@ async function pullCloudStateIntoStore() {
         const cloudCases = await cRes.json();
         if (Array.isArray(cloudCases)) {
           for (const cc of cloudCases) {
-            if (!store.cases.some(c => c.case_id === cc.case_id || c.case_title === cc.case_title)) {
+            const existing = store.cases.find(c => c.case_id === cc.case_id || c.case_title === cc.case_title);
+            if (!existing) {
               store.cases.unshift(cc);
               if (cc.victim && !store.victims.some(v => v.phone === cc.victim.phone)) {
                 store.victims.unshift(cc.victim);
                 store.users.unshift(cc.victim);
               }
+              if ((cc.case_status || '').toLowerCase().trim() === 'in court') {
+                ensureHearingForInCourtCase(cc, store);
+              }
               updated = true;
+            } else {
+              if (cc.case_status && cc.case_status !== existing.case_status) {
+                existing.case_status = cc.case_status;
+                if ((existing.case_status || '').toLowerCase().trim() === 'in court') {
+                  ensureHearingForInCourtCase(existing, store);
+                }
+                updated = true;
+              }
+              if (cc.priority_level && cc.priority_level !== existing.priority_level) {
+                existing.priority_level = cc.priority_level;
+                updated = true;
+              }
             }
           }
         }
@@ -680,10 +827,19 @@ window.fetch = async function (resource, options = {}) {
     if (c) {
       if (body.case_status) c.case_status = body.case_status;
       if (body.priority_level) c.priority_level = body.priority_level;
+      if (body.investigator_id) c.investigator_id = body.investigator_id;
+
+      if ((c.case_status || '').toLowerCase().trim() === 'in court') {
+        ensureHearingForInCourtCase(c, store);
+      }
+
       saveStore(store);
       logSql('UPDATE', `UPDATE CYBER_CRIME_CASE SET CASE_STATUS = '${c.case_status}', PRIORITY_LEVEL = '${c.priority_level}' WHERE CASE_ID = ${caseId}`, {}, 'CYBER_CRIME_CASE');
+
+      // Update cloud sync relay copy so all devices see the updated case status
+      updateCaseInCloud(c);
     }
-    return jsonResponse({ success: true });
+    return jsonResponse({ success: true, case: c });
   }
 
   // 11. QUICK CASE STATUS TRACKER
@@ -693,15 +849,19 @@ window.fetch = async function (resource, options = {}) {
     if (!c) {
       return jsonResponse({ error: 'No cyber crime record found with this Case ID.' }, 404);
     }
+    if ((c.case_status || '').toLowerCase().trim() === 'in court') {
+      ensureHearingForInCourtCase(c, store);
+    }
     const inv = store.investigators.find(i => i.investigator_id === c.investigator_id);
     const dept = DEPARTMENTS.find(d => d.department_id === inv?.department_id);
+    const h = (store.hearings || []).find(item => String(item.case_id) === String(c.case_id));
     return jsonResponse({
       case_id: c.case_id,
       case_title: c.case_title,
       status: c.case_status,
       investigator_name: inv?.name || 'Assigned Officer',
       department: dept?.department_name || 'Cyber Crime Division',
-      next_hearing_date: null
+      next_hearing_date: h ? (h.hearing_date || h.next_hearing_date) : null
     });
   }
 
@@ -780,8 +940,33 @@ window.fetch = async function (resource, options = {}) {
       if (pathname.startsWith('/api/hearings/case/')) {
         caseId = pathname.split('/').pop();
       }
-      const hList = caseId ? store.hearings.filter(h => String(h.case_id) === String(caseId)) : store.hearings;
-      return jsonResponse(hList);
+
+      // Automatically schedule a hearing for any case in 'In Court' status
+      (store.cases || []).forEach(c => {
+        if ((c.case_status || '').toLowerCase().trim() === 'in court') {
+          ensureHearingForInCourtCase(c, store);
+        }
+      });
+
+      const rawHearings = caseId ? store.hearings.filter(h => String(h.case_id) === String(caseId)) : store.hearings;
+
+      const enriched = (rawHearings || []).map(h => {
+        const cId = h.court_id || 3;
+        const court = COURTS.find(c => c.court_id === cId) || COURTS[2] || COURTS[0];
+        return {
+          ...h,
+          hearing_no: h.hearing_no || 1,
+          court_name: h.court_name || court.court_name,
+          court_type: h.court_type || 'Sessions Court',
+          court_location: h.court_location || `${court.city}, ${court.state}`,
+          court_room_no: h.court_room_no || 'Court Hall No. 3 (Cyber Division)',
+          judge_name: h.judge_name || 'Hon. Special Magistrate K. Ramanathan',
+          hearing_status: h.hearing_status || 'Scheduled',
+          verdict: h.verdict || 'Charge Sheet submitted by Police under Sec 66D IT Act. Notice issued to Bank for fund recovery.'
+        };
+      });
+
+      return jsonResponse(enriched);
     }
     if (method === 'POST') {
       const h = { hearing_id: Date.now(), ...body };

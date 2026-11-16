@@ -384,6 +384,66 @@ router.put('/:id', async (req, res) => {
       }
     }
 
+    // Auto-schedule Court Hearing if case status is updated to 'In Court'
+    if (c.case_status === 'In Court') {
+      const existingHearing = store.hearings.find(h => h.case_id === caseId);
+      if (!existingHearing) {
+        const hearingNo = db.getNextHearingNo(caseId);
+        const courtId = ((c.crime_type_id || 1) % 5) + 1;
+        const hearingDate = new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0];
+        const nextDate = new Date(Date.now() + 21 * 86400000).toISOString().split('T')[0];
+        const newHearing = {
+          case_id: caseId,
+          hearing_no: hearingNo,
+          court_id: courtId,
+          hearing_date: hearingDate,
+          hearing_status: 'Scheduled',
+          verdict: 'Charge Sheet submitted by Police. Bank freeze order issued under Sec 66D IT Act.',
+          next_hearing_date: nextDate,
+          judge_name: 'Hon. Special Magistrate K. Ramanathan',
+          court_room_no: 'Court Hall No. 3'
+        };
+        store.hearings.push(newHearing);
+
+        const hearingSql = `INSERT INTO CASE_HEARING (
+          CASE_ID, HEARING_NO, COURT_ID, HEARING_DATE, HEARING_STATUS, VERDICT, NEXT_HEARING_DATE, JUDGE_NAME, COURT_ROOM_NO
+        ) VALUES (
+          :case_id, :hearing_no, :court_id, TO_DATE(:hearing_date, 'YYYY-MM-DD'), :hearing_status, :verdict, 
+          TO_DATE(:next_hearing_date, 'YYYY-MM-DD'), :judge_name, :court_room_no
+        )`;
+
+        logSql('INSERT', hearingSql, {
+          case_id: caseId,
+          hearing_no: hearingNo,
+          court_id: courtId,
+          hearing_date: hearingDate,
+          hearing_status: 'Scheduled',
+          verdict: newHearing.verdict,
+          next_hearing_date: nextDate,
+          judge_name: newHearing.judge_name,
+          court_room_no: newHearing.court_room_no
+        }, db.isOracleConnected() ? 'oracle' : 'in-memory', 'CASE_HEARING');
+
+        if (db.isOracleConnected()) {
+          try {
+            await db.query(hearingSql, {
+              case_id: caseId,
+              hearing_no: hearingNo,
+              court_id: courtId,
+              hearing_date: hearingDate,
+              hearing_status: 'Scheduled',
+              verdict: newHearing.verdict,
+              next_hearing_date: nextDate,
+              judge_name: newHearing.judge_name,
+              court_room_no: newHearing.court_room_no
+            });
+          } catch (oraH) {
+            console.warn('Oracle Hearing insert note:', oraH.message);
+          }
+        }
+      }
+    }
+
     res.json({ success: true, case: enrichCase(c, store) });
   } catch (err) {
     console.error('Update case error:', err);
