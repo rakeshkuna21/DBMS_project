@@ -64,7 +64,7 @@ export default function NationalEmblemLoader({
         {/* Slow Internet Alert if detected or toggled */}
         {isSlowInternet ? (
           <div className="slow-net-alert">
-            <span className="slow-net-icon">⚠️</span>
+            
             <div>
               <strong>Your internet connection is slow.</strong>
               <p>Please wait while we safely process your request. Do not refresh the page or press the back button.</p>

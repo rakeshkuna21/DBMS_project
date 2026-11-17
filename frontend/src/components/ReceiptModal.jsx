@@ -15,7 +15,7 @@ export default function ReceiptModal({ caseData, onClose }) {
           <span className="receipt-tag">Official Government of India Acknowledgment</span>
           <div className="receipt-buttons">
             <button className="btn btn-primary btn-print" onClick={handlePrint}>
-              🖨️ Print / Save as PDF
+              Print / Save as PDF
             </button>
             <button className="btn btn-secondary" onClick={onClose}>
               Close

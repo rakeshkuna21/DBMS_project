@@ -385,7 +385,7 @@ async function relayCaseToCloud(caseData, victimData) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(existingList)
     });
-    console.log('☁️ Case successfully broadcasted to Cloud Sync Relay.');
+    console.log('Case broadcast to cloud sync relay.');
   } catch (err) {
     // Continue smoothly if offline
   }
@@ -415,7 +415,7 @@ async function updateCaseInCloud(caseData) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(existingList)
       });
-      console.log('☁️ Case status updated in Cloud Sync Relay to:', caseData.case_status);
+      console.log('Case status updated in cloud sync relay to:', caseData.case_status);
     }
   } catch (err) {}
 }
@@ -438,7 +438,7 @@ async function relayUserToCloud(userData) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(existingList)
     });
-    console.log('☁️ Registered citizen successfully broadcasted to Cloud Sync Relay.');
+    console.log('Registered citizen broadcast to cloud sync relay.');
   } catch (err) {}
 }
 
@@ -503,7 +503,7 @@ async function pullCloudStateIntoStore() {
 
     if (updated) {
       saveStore(store);
-      console.log('🔄 Synced latest cloud users and cases into local store.');
+      console.log('Synchronized latest cloud users and cases into local store.');
     }
   } catch (err) {}
 }
@@ -568,9 +568,9 @@ window.fetch = async function (resource, options = {}) {
   if (pathname === '/api/health') {
     return jsonResponse({
       status: 'HEALTHY',
-      system: 'National Cyber Crime Management Portal (Autonomous Live Engine)',
+      system: 'National Cyber Crime Management Portal (API Engine)',
       oracleConnected: true,
-      databaseMode: 'Client In-Browser Autonomous Store (24/7 Active)',
+      databaseMode: 'Client In-Browser Store (24/7 Active)',
       timestamp: new Date().toISOString()
     });
   }
@@ -1044,4 +1044,4 @@ window.fetch = async function (resource, options = {}) {
   return jsonResponse({ message: 'OK' });
 };
 
-console.log('🏛️ Universal In-Browser API Adapter Active for 24/7 Standalone & GitHub Pages execution.');
+console.log('In-Browser API Adapter initialized for client execution.');

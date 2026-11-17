@@ -2,14 +2,14 @@
    NATIONAL CYBER CRIME REPORTING & MANAGEMENT PORTAL
    Ministry of Home Affairs | Government of India
    100% Indian Flag Color Theme (Strictly ZERO Blue)
-   Theme: India Green (#138808 / #198754), Saffron Orange (#FF9933 / #EA580C),
+   Theme: India Green (#138808 / #000080), Saffron Orange (#FF9933 / #EA580C),
           Pure White (#FFFFFF), Soft Gray (#F4F6F8), Dark Charcoal (#1F2937)
    Typography: 'Noto Sans', 'Roboto', 'Arial', sans-serif
    ==================================================================== */
 
 :root {
   --white: #FFFFFF;
-  --bg-soft: #F4F6F8;
+  --bg-soft: #F8F9FA;
   --bg-card: #FFFFFF;
   --charcoal-dark: #111827;
   --charcoal: #1F2937;
@@ -21,23 +21,23 @@
   --saffron-dark: #EA580C;
   --saffron-light: #FFF7ED;
   --green: #138808;
-  --green-primary: #198754;
-  --green-dark: #0F6B06;
-  --green-gov: #28965A;
+  --green-primary: #000080;
+  --green-dark: #000066;
+  --green-gov: #000080;
   --green-light: #ECFDF5;
   
   --border: #E5E7EB;
-  --border-focus: #198754;
+  --border-focus: #000080;
   --danger: #DC2626;
   --danger-light: #FEF2F2;
   --warning: #D97706;
   --warning-light: #FFFBEB;
   
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
-  --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.08);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.08);
   --shadow-dropdown: 0 10px 25px rgba(0, 0, 0, 0.12);
   
-  --font-family: 'Noto Sans', 'Roboto', 'Arial', sans-serif;
+  --font-family: 'Roboto', 'Open Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-base: 14px;
 }
 
@@ -80,8 +80,10 @@ body {
 }
 
 .gov-top-strip {
-  background-color: var(--green-gov);
-  color: var(--white);
+  background-color: #000080;
+  border-top: 3px solid #FF9933;
+  border-bottom: 2px solid #138808;
+  color: #FFFFFF;
   padding: 4px 0;
   font-size: 0.76rem;
   font-weight: 600;
@@ -170,7 +172,7 @@ body {
 .gov-title-english {
   font-size: 1.15rem;
   font-weight: 800;
-  color: var(--charcoal-dark);
+  color: #000080;
   letter-spacing: -0.2px;
   text-transform: uppercase;
   line-height: 1.2;
@@ -241,7 +243,7 @@ body {
   margin-top: 8px;
   background-color: var(--white);
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 6px;
   box-shadow: var(--shadow-dropdown);
   min-width: 260px;
   padding: 8px 0;
@@ -271,7 +273,7 @@ body {
   align-items: center;
   gap: 6px;
   font-size: 0.85rem;
-  color: var(--charcoal-dark);
+  color: #000080;
 }
 
 .floating-user-name {
@@ -285,7 +287,7 @@ body {
 }
 
 /* ====================================================================
-   UPDATE 1: INDIAN FLAG TRICOLOR 3-LINE MENU ICON (☰)
+   UPDATE 1: MENU ICON
    ==================================================================== */
 .tricolor-menu-pill {
   background-color: #1E293B; /* Subtle dark charcoal pill */
@@ -335,7 +337,7 @@ body {
    HERO TRICOLOR BANNER (ZERO BLUE)
    ==================================================================== */
 .gov-hero-banner {
-  background: linear-gradient(135deg, #FFF7ED 0%, #FFFFFF 50%, #ECFDF5 100%);
+  background: #FFFFFF;
   border-bottom: 1px solid var(--border);
   padding: 36px 24px 28px;
   text-align: center;
@@ -374,7 +376,7 @@ body {
 .gov-hero-title {
   font-size: 1.85rem;
   font-weight: 800;
-  color: var(--charcoal-dark);
+  color: #000080;
   letter-spacing: -0.5px;
   margin-bottom: 10px;
   line-height: 1.25;
@@ -436,7 +438,7 @@ body {
   width: 100%;
   max-width: 480px;
   background-color: var(--white);
-  border-radius: 12px;
+  border-radius: 6px;
   box-shadow: var(--shadow-card);
   border: 1px solid rgba(0, 0, 0, 0.05);
   padding: 32px 32px 28px;
@@ -451,7 +453,7 @@ body {
   width: 68px;
   height: 68px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #FFEDD5 0%, #DCFCE7 100%);
+  background: #FFFFFF;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -468,7 +470,7 @@ body {
 .official-login-title {
   font-size: 1.35rem;
   font-weight: 800;
-  color: var(--charcoal-dark);
+  color: #000080;
   margin-bottom: 16px;
   text-align: center;
 }
@@ -525,7 +527,7 @@ body {
   height: 48px;
   padding: 12px 14px;
   font-size: 0.92rem;
-  color: var(--charcoal-dark);
+  color: #000080;
   background-color: var(--white);
   border: 1.5px solid #CBD5E1;
   border-radius: 6px;
@@ -622,13 +624,7 @@ body {
 
 .captcha-pattern-bg {
   padding: 0 14px;
-  background: repeating-linear-gradient(
-    45deg,
-    #F1F5F9,
-    #F1F5F9 4px,
-    #E2E8F0 4px,
-    #E2E8F0 8px
-  );
+  background: #EEF2FF;
   height: 100%;
   display: flex;
   align-items: center;
@@ -640,7 +636,7 @@ body {
   font-size: 1.25rem;
   font-weight: 900;
   letter-spacing: 3px;
-  color: var(--charcoal-dark);
+  color: #000080;
   user-select: none;
   font-style: italic;
 }
@@ -662,7 +658,7 @@ body {
 
 .btn-captcha-refresh:hover {
   background-color: #CBD5E1;
-  color: var(--charcoal-dark);
+  color: #000080;
 }
 
 .uppercase-text {
@@ -819,7 +815,7 @@ body {
 .gcc-title {
   font-size: 1.25rem;
   font-weight: 800;
-  color: var(--charcoal-dark);
+  color: #000080;
   margin-bottom: 4px;
 }
 
@@ -856,7 +852,7 @@ body {
   margin-top: 20px;
   background-color: #F8FAFC;
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 6px;
   padding: 20px;
 }
 
@@ -879,7 +875,7 @@ body {
 .crd-case-title {
   font-size: 1.05rem;
   font-weight: 700;
-  color: var(--charcoal-dark);
+  color: #000080;
 }
 
 .crd-status-pill {
@@ -916,7 +912,7 @@ body {
 .crd-val {
   font-size: 0.88rem;
   font-weight: 700;
-  color: var(--charcoal-dark);
+  color: #000080;
 }
 
 .crime-types-grid {
@@ -929,7 +925,7 @@ body {
 .crime-type-card {
   background-color: #FAFAFA;
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 6px;
   padding: 18px;
   display: flex;
   flex-direction: column;
@@ -952,7 +948,7 @@ body {
 .ctc-title {
   font-size: 0.95rem;
   font-weight: 700;
-  color: var(--charcoal-dark);
+  color: #000080;
 }
 
 .ctc-category {
@@ -1160,7 +1156,7 @@ body {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background-color: #198754;
+  background-color: #000080;
   animation: dotBounce 1.4s infinite ease-in-out both;
 }
 
@@ -1184,7 +1180,7 @@ body {
   background-color: #FFFBEB;
   border: 1px solid #FCD34D;
   padding: 12px 16px;
-  border-radius: 8px;
+  border-radius: 6px;
   font-size: 0.8rem;
   color: #92400E;
   text-align: left;
@@ -1249,7 +1245,7 @@ body {
 }
 
 .btn-sms-copy {
-  background-color: #198754;
+  background-color: #000080;
   color: #FFFFFF;
   border: none;
   padding: 4px 12px;
@@ -1291,7 +1287,7 @@ body {
 }
 
 .vmenu-header {
-  background-color: var(--charcoal-dark);
+  background-color: #000080;
   color: var(--white);
   padding: 16px 20px;
   display: flex;
@@ -1332,7 +1328,7 @@ body {
   gap: 14px;
   padding: 12px 14px;
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 6px;
   background-color: var(--white);
   text-align: left;
   cursor: pointer;
@@ -1356,7 +1352,7 @@ body {
   display: block;
   font-size: 0.88rem;
   font-weight: 700;
-  color: var(--charcoal-dark);
+  color: #000080;
 }
 
 .vmenu-item-desc {
@@ -1382,7 +1378,7 @@ body {
 
 /* Developers Card */
 .developers-official-card {
-  background: linear-gradient(135deg, #FFFBEB 0%, #F0FDF4 100%);
+  background: #FFFFFF;
   border: 1.5px solid #FCD34D;
   border-radius: 10px;
   padding: 20px;
@@ -1396,7 +1392,7 @@ body {
 }
 
 .dev-trophy { font-size: 1.6rem; }
-.dev-header h4 { font-size: 0.95rem; font-weight: 800; color: var(--charcoal-dark); }
+.dev-header h4 { font-size: 0.95rem; font-weight: 800; color: #000080; }
 .dev-header p { font-size: 0.74rem; color: var(--text-muted); }
 
 .dev-role-badge {
@@ -1440,7 +1436,7 @@ body {
 
 .dev-details strong {
   font-size: 0.86rem;
-  color: var(--charcoal-dark);
+  color: #000080;
   display: block;
 }
 
@@ -1497,15 +1493,17 @@ body {
 }
 
 .subnav-btn.active {
-  color: var(--green-primary);
-  border-bottom-color: var(--saffron-dark);
+  color: #000080;
+  border-bottom: 3px solid #000080;
+  font-weight: 700;
+  background: #EEF2FF;
 }
 
 .helpline-hero-box {
-  background: linear-gradient(135deg, #FFF7ED 0%, #FFFFFF 50%, #ECFDF5 100%);
+  background: #FFFFFF;
   border: 1px solid var(--border);
   border-left: 6px solid var(--saffron-dark);
-  border-radius: 8px;
+  border-radius: 6px;
   padding: 24px;
   display: flex;
   justify-content: space-between;
@@ -1563,7 +1561,7 @@ body {
 .kpi-card {
   background-color: var(--white);
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 6px;
   padding: 18px;
   display: flex;
   align-items: center;
@@ -1572,7 +1570,7 @@ body {
   border-top: 4px solid var(--green-primary);
 }
 
-.kpi-card.kpi-navy { border-top-color: var(--charcoal-dark); }
+.kpi-card.kpi-navy { border-top-color: #000080; }
 .kpi-card.kpi-blue { border-top-color: var(--green-gov); }
 .kpi-card.kpi-green { border-top-color: var(--green-primary); }
 .kpi-card.kpi-saffron { border-top-color: var(--saffron-dark); }
@@ -1584,7 +1582,7 @@ body {
 .kpi-num {
   font-size: 1.5rem;
   font-weight: 800;
-  color: var(--charcoal-dark);
+  color: #000080;
   display: block;
 }
 
@@ -1598,7 +1596,7 @@ body {
 .gov-table-wrapper {
   overflow-x: auto;
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 6px;
   background-color: var(--white);
 }
 
@@ -1611,7 +1609,7 @@ body {
 
 .gov-data-table th {
   background-color: #F8FAFC;
-  color: var(--charcoal-dark);
+  color: #000080;
   font-weight: 700;
   padding: 12px 16px;
   border-bottom: 1.5px solid var(--border);
@@ -1748,7 +1746,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 8px;
+  border-radius: 6px;
   transition: all 0.2s ease;
 }
 
@@ -1981,7 +1979,7 @@ body {
 .fmenu-profile-card {
   background: #F8FAFC;
   border: 1px solid #E2E8F0;
-  border-radius: 8px;
+  border-radius: 6px;
   padding: 12px 14px;
   display: flex;
   flex-direction: column;
@@ -2006,11 +2004,11 @@ body {
 }
 
 .fprop-badge {
-  background: #198754;
+  background: #000080;
   color: #FFFFFF;
   font-size: 0.72rem;
   padding: 2px 8px;
-  border-radius: 12px;
+  border-radius: 6px;
   font-weight: 700;
 }
 
@@ -2056,9 +2054,9 @@ body {
 }
 
 .btn-font-pill.active {
-  background: #198754;
+  background: #000080;
   color: #FFFFFF;
-  border-color: #198754;
+  border-color: #000080;
 }
 
 .fmenu-switch {
@@ -2097,7 +2095,7 @@ body {
 }
 
 .fmenu-switch input:checked + .fswitch-slider {
-  background-color: #198754;
+  background-color: #000080;
 }
 
 .fmenu-switch input:checked + .fswitch-slider::before {
@@ -2111,7 +2109,7 @@ body {
 }
 
 .fmenu-helpline-card {
-  background: linear-gradient(135deg, #FFF7ED, #FEF3C7);
+  background: #FFFFFF;
   border: 1.5px solid #F97316;
   border-radius: 10px;
   padding: 14px;
@@ -2137,7 +2135,7 @@ body {
 .fhl-info-text {
   background: #F8FAFC;
   border: 1px solid #E2E8F0;
-  border-radius: 8px;
+  border-radius: 6px;
   padding: 10px 12px;
   font-size: 0.78rem;
   color: #334155;
@@ -2193,7 +2191,7 @@ body {
   background: #F8FAFC;
   border: 1px solid #E2E8F0;
   padding: 10px 12px;
-  border-radius: 8px;
+  border-radius: 6px;
   font-size: 0.82rem;
   margin-bottom: 12px;
 }
@@ -2202,7 +2200,7 @@ body {
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: #198754;
+  background: #000080;
   box-shadow: 0 0 0 3px rgba(25, 135, 84, 0.2);
 }
 
@@ -2288,7 +2286,7 @@ body {
 .top-toast-card {
   pointer-events: auto;
   background: #FFFFFF;
-  border-radius: 12px;
+  border-radius: 6px;
   box-shadow: 0 18px 40px rgba(15, 23, 42, 0.22), 0 6px 14px rgba(15, 23, 42, 0.08);
   border: 2px solid;
   padding: 14px 18px;
@@ -2312,7 +2310,7 @@ body {
 }
 
 .top-toast-card.border-green {
-  border-color: #198754;
+  border-color: #000080;
 }
 
 .top-toast-card.border-danger {
@@ -2354,7 +2352,7 @@ body {
   font-size: 0.74rem;
   font-weight: 700;
   padding: 2px 8px;
-  border-radius: 12px;
+  border-radius: 6px;
 }
 
 .top-toast-sent, .top-toast-resent {
@@ -2458,7 +2456,7 @@ body {
 
 .btn-top-toast-copy {
   flex: 1;
-  background: #198754;
+  background: #000080;
   color: #FFFFFF;
   border: none;
   border-radius: 6px;
@@ -2470,7 +2468,7 @@ body {
 }
 
 .btn-top-toast-copy:hover {
-  background: #157347;
+  background: #000066;
 }
 
 .btn-top-toast-dismiss {
@@ -2515,7 +2513,7 @@ body {
 }
 
 .btn-switch-signup-inline {
-  background: #198754 !important;
+  background: #000080 !important;
   color: #FFFFFF !important;
   border: none !important;
   border-radius: 4px;
@@ -2529,7 +2527,7 @@ body {
 }
 
 .btn-switch-signup-inline:hover {
-  background: #157347 !important;
+  background: #000066 !important;
 }
 
 /* ==================================================================== */
@@ -2571,15 +2569,15 @@ body {
 }
 
 .subnav-btn:hover {
-  color: #198754;
+  color: #000080;
   background: #F8FAFC;
 }
 
 .subnav-btn.active {
-  color: #198754;
-  border-bottom-color: #198754;
+  color: #000080;
+  border-bottom: 3px solid #000080;
   font-weight: 700;
-  background: #F0FDF4;
+  background: #EEF2FF;
 }
 
 /* STEPPER ROW */
@@ -2590,7 +2588,7 @@ body {
   margin-bottom: 2rem;
   background: #F8FAFC;
   padding: 1.25rem 2rem;
-  border-radius: 12px;
+  border-radius: 6px;
   border: 1.5px solid #E2E8F0;
 }
 
@@ -2604,7 +2602,7 @@ body {
 }
 
 .step-node.active {
-  color: #198754;
+  color: #000080;
   font-weight: 700;
 }
 
@@ -2628,7 +2626,7 @@ body {
 }
 
 .step-node.active .sn-circle {
-  background: #198754;
+  background: #000080;
   color: #FFFFFF;
   box-shadow: 0 0 0 4px rgba(25, 135, 84, 0.2);
 }
@@ -2685,7 +2683,7 @@ body {
   box-sizing: border-box;
   padding: 0.8rem 1rem;
   border: 1.5px solid #CBD5E1;
-  border-radius: 8px;
+  border-radius: 6px;
   font-size: 0.95rem;
   color: #1E293B;
   background: #FFFFFF;
@@ -2695,7 +2693,7 @@ body {
 
 .form-input:focus, .form-select:focus, .form-textarea:focus {
   outline: none;
-  border-color: #198754;
+  border-color: #000080;
   box-shadow: 0 0 0 3px rgba(25, 135, 84, 0.15);
   background: #FFFFFF;
 }
@@ -2764,7 +2762,7 @@ body {
   padding: 0.75rem 1.5rem;
   font-size: 0.92rem;
   font-weight: 700;
-  border-radius: 8px;
+  border-radius: 6px;
   border: none;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -2772,12 +2770,12 @@ body {
 }
 
 .btn-primary, .btn-report-now {
-  background: #198754;
+  background: #000080;
   color: #FFFFFF;
 }
 
 .btn-primary:hover, .btn-report-now:hover {
-  background: #157347;
+  background: #000066;
   box-shadow: 0 4px 14px rgba(25, 135, 84, 0.25);
 }
 
@@ -2818,7 +2816,7 @@ body {
 .declaration-checkbox-box {
   background: #F8FAFC;
   border: 1.5px solid #CBD5E1;
-  border-radius: 8px;
+  border-radius: 6px;
   padding: 1.2rem;
   margin-top: 1.25rem;
   text-align: left;
@@ -2862,7 +2860,7 @@ body {
 /* GOV CARDS & TITLES */
 .gov-card {
   background: #FFFFFF;
-  border-radius: 12px;
+  border-radius: 6px;
   border: 1.5px solid #E2E8F0;
   box-shadow: 0 4px 20px rgba(15, 23, 42, 0.05);
   padding: 2rem;
@@ -2899,7 +2897,7 @@ body {
   width: 100%;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
-  border-radius: 8px;
+  border-radius: 6px;
   border: 1px solid #E2E8F0;
 }
 
@@ -2979,7 +2977,7 @@ body {
   padding: 3rem 1.5rem;
   background: #F8FAFC;
   border: 2px dashed #CBD5E1;
-  border-radius: 12px;
+  border-radius: 6px;
   margin-top: 1rem;
 }
 
@@ -2988,9 +2986,9 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: linear-gradient(135deg, #FFF7ED 0%, #FEF3C7 100%);
+  background: #FFFFFF;
   border: 2px solid #F97316;
-  border-radius: 12px;
+  border-radius: 6px;
   padding: 1.75rem 2rem;
   margin-bottom: 2rem;
   gap: 1.5rem;
@@ -3113,9 +3111,9 @@ body {
 }
 
 .filter-pill.active {
-  background: #198754;
+  background: #000080;
   color: #FFFFFF;
-  border-color: #198754;
+  border-color: #000080;
 }
 
 /* SAFETY CARDS & LEARNING */
@@ -3185,7 +3183,7 @@ body {
 
 .faq-item {
   border: 1.5px solid #E2E8F0;
-  border-radius: 8px;
+  border-radius: 6px;
   overflow: hidden;
   background: #FFFFFF;
 }
@@ -3241,14 +3239,14 @@ body {
 }
 
 .hd-card-highlight {
-  background: linear-gradient(135deg, #FFF7ED, #FEF3C7);
+  background: #FFFFFF;
   border-color: #F97316;
 }
 
 .hd-badge {
   font-size: 0.72rem;
   font-weight: 800;
-  background: #198754;
+  background: #000080;
   color: #FFFFFF;
   padding: 0.2rem 0.6rem;
   border-radius: 4px;
@@ -3283,7 +3281,7 @@ body {
 .gov-auth-notice-banner {
   background: #FFFBEB;
   border: 1.5px solid #FDE68A;
-  border-radius: 8px;
+  border-radius: 6px;
   padding: 0.85rem 1.25rem;
   margin-bottom: 1.25rem;
   display: flex;
@@ -3303,3 +3301,20 @@ body {
 }
 
 
+
+
+/* Status Indicator Dots */
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+.status-dot.active, .status-dot.success {
+  background-color: #138808;
+}
+.status-dot.pending, .status-dot.warning {
+  background-color: #FF9933;
+}

@@ -72,7 +72,7 @@ export default function FloatingMenuDropdown({
       <div className="fmenu-header">
         <div className="fmenu-user-brief">
           <div className="fmenu-avatar">
-            {loggedInUser ? (loggedInUser.role === 'Investigator' ? '👮' : '👤') : '🏛️'}
+            {loggedInUser ? (loggedInUser.role === 'Investigator' ? 'Officer' : 'Citizen') : 'Portal'}
           </div>
           <div className="fmenu-user-text">
             <span className="fmenu-user-name">
@@ -111,7 +111,7 @@ export default function FloatingMenuDropdown({
               className="fmenu-item"
               onClick={() => setActiveSection('profile')}
             >
-              <span className="fmenu-item-icon">👤</span>
+              
               <div className="fmenu-item-info">
                 <span className="fmenu-item-title">Account Details</span>
                 <span className="fmenu-item-sub">View registered ID &amp; contact</span>
@@ -125,7 +125,7 @@ export default function FloatingMenuDropdown({
             className="fmenu-item"
             onClick={() => setActiveSection('settings')}
           >
-            <span className="fmenu-item-icon">⚙️</span>
+            
             <div className="fmenu-item-info">
               <span className="fmenu-item-title">Portal Settings</span>
               <span className="fmenu-item-sub">Font size &amp; slow internet test</span>
@@ -138,7 +138,7 @@ export default function FloatingMenuDropdown({
             className="fmenu-item"
             onClick={() => setActiveSection('helpline')}
           >
-            <span className="fmenu-item-icon">📞</span>
+            
             <div className="fmenu-item-info">
               <span className="fmenu-item-title">Cyber Helpline 1930</span>
               <span className="fmenu-item-sub">Golden Hour fraud freeze advisory</span>
@@ -151,7 +151,7 @@ export default function FloatingMenuDropdown({
             className="fmenu-item fmenu-highlight"
             onClick={() => setActiveSection('developers')}
           >
-            <span className="fmenu-item-icon">👨‍💻</span>
+            
             <div className="fmenu-item-info">
               <span className="fmenu-item-title">Developers</span>
               <span className="fmenu-item-sub">Krish Vats, Sai Dheepak, Rakeesh, Shanmukh</span>
@@ -164,7 +164,7 @@ export default function FloatingMenuDropdown({
             className="fmenu-item"
             onClick={() => setActiveSection('database')}
           >
-            <span className="fmenu-item-icon">🗄️</span>
+            
             <div className="fmenu-item-info">
               <span className="fmenu-item-title">Database &amp; SQL Inspector</span>
               <span className="fmenu-item-sub">Live Oracle 11g XE status &amp; logs</span>
@@ -183,7 +183,7 @@ export default function FloatingMenuDropdown({
                   onLogout();
                 }}
               >
-                <span className="fmenu-item-icon">🚪</span>
+                
                 <div className="fmenu-item-info">
                   <span className="fmenu-item-title">Log Out</span>
                   <span className="fmenu-item-sub">End current secure session</span>
@@ -278,7 +278,7 @@ export default function FloatingMenuDropdown({
       {/* Sub-view: Helpline 1930 */}
       {activeSection === 'helpline' && (
         <div className="fmenu-subview">
-          <h4 className="fmenu-sub-title">📞 National Cyber Helpline</h4>
+          <h4 className="fmenu-sub-title">National Cyber Helpline</h4>
           <div className="fmenu-helpline-card">
             <span className="fhl-number">DIAL 1930</span>
             <p className="fhl-desc">Toll-Free National Helpline for Financial Frauds</p>
@@ -292,7 +292,7 @@ export default function FloatingMenuDropdown({
       {/* Sub-view: Developers */}
       {activeSection === 'developers' && (
         <div className="fmenu-subview">
-          <h4 className="fmenu-sub-title">👨‍💻 Developers &amp; Project Credits</h4>
+          <h4 className="fmenu-sub-title">Developers &amp; Project Credits</h4>
           <div className="fmenu-dev-badge">Full-Stack Architecture &amp; Oracle 11g Engineering</div>
           <ul className="fmenu-dev-list">
             <li>
@@ -318,7 +318,7 @@ export default function FloatingMenuDropdown({
       {/* Sub-view: Database & SQL Inspector */}
       {activeSection === 'database' && (
         <div className="fmenu-subview">
-          <h4 className="fmenu-sub-title">🗄️ Database &amp; SQL Inspector</h4>
+          <h4 className="fmenu-sub-title">Database &amp; SQL Inspector</h4>
           <div className="fmenu-db-status">
             <span className="fdb-dot"></span>
             <div>

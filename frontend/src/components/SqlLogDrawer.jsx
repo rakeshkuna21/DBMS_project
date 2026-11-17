@@ -61,7 +61,7 @@ export default function SqlLogDrawer() {
         onClick={() => setIsOpen(!isOpen)}
         title="View Live Oracle 11g SQL Execution Log"
       >
-        <span className="sql-icon">📋</span>
+        
         <span className="sql-label">Oracle 11g SQL Logs ({logs.length})</span>
         <span className="sql-pulse"></span>
       </button>
@@ -73,7 +73,7 @@ export default function SqlLogDrawer() {
             <div className="sql-drawer-header">
               <div>
                 <h3 className="sql-drawer-title">
-                  ⚡ Live Oracle 11g SQL Execution Stream
+                  Live Oracle 11g SQL Execution Stream
                 </h3>
                 <p className="sql-drawer-subtitle">
                   Inspect real-time DML/DDL queries dispatched across all 11 ER Diagram entities
@@ -124,7 +124,7 @@ export default function SqlLogDrawer() {
                           TABLE: {log.entity?.toUpperCase() || 'ORACLE'}
                         </span>
                         <span className="sql-source-tag">
-                          {log.source === 'oracle' ? '🏛️ ORACLE 11g XE' : '⚡ IN-MEMORY ENGINE'}
+                          {log.source === 'oracle' ? 'ORACLE 11g XE' : 'IN-MEMORY ENGINE'}
                         </span>
                         <span className="sql-timestamp">
                           {log.timestamp ? new Date(log.timestamp).toLocaleTimeString() : 'Just now'}

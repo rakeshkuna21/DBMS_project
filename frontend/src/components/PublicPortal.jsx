@@ -458,7 +458,7 @@ export default function PublicPortal({
       <section className="gov-login-viewport" id="login-card-container">
         {activeNavTab && !['home', 'track', 'learning', 'helpline'].includes(activeNavTab) && (
           <div className="gov-auth-notice-banner animate-slide-down">
-            <span className="gan-icon">🔒</span>
+            
             <span className="gan-text">
               <strong>Official Login Required:</strong> Please enter your registered credentials or register a new account below to file a cyber complaint or access restricted databases.
             </span>
@@ -537,7 +537,7 @@ export default function PublicPortal({
             <form onSubmit={handleLoginSubmit} className="official-login-form">
               {signInError && (
                 <div className="gov-alert-danger animate-shake">
-                  <span className="alert-icon">⚠️</span>
+                  
                   <span>{signInError}</span>
                   {signInError.includes('sign up first') && loginRole === 'Victim' && (
                     <button
@@ -626,7 +626,7 @@ export default function PublicPortal({
                     tabIndex={-1}
                     title={showPassword ? 'Hide password' : 'Show password'}
                   >
-                    {showPassword ? '👁️' : '🔒'}
+                    {showPassword ? 'Hide' : 'Show'}
                   </button>
                 </div>
               </div>
@@ -650,7 +650,7 @@ export default function PublicPortal({
                   </div>
                   {otpSent && (
                     <p className="otp-live-notice">
-                      ✅ OTP sent! Check the top toast notification for your code.
+                      OTP sent successfully. Check the notification for your code.
                     </p>
                   )}
                 </div>
@@ -707,7 +707,7 @@ export default function PublicPortal({
 
               {loginRole === 'Investigator' ? (
                 <div style={{ marginTop: '14px', padding: '10px 14px', background: '#F8FAFC', border: '1px solid #CBD5E1', borderRadius: '6px', fontSize: '0.82rem', color: '#475569', textAlign: 'left', lineHeight: '1.4' }}>
-                  <strong>🔒 Restricted Law Enforcement Portal:</strong> Cyber police officer accounts are pre-commissioned by Ministry / State Cyber Police Cells across CBI, I4C, Delhi, Maharashtra, Karnataka, Telangana, Tamil Nadu, and West Bengal duty circles. Public registration is restricted to citizens only.
+                  <strong>Restricted Law Enforcement Portal:</strong> Cyber police officer accounts are pre-commissioned by Ministry / State Cyber Police Cells across CBI, I4C, Delhi, Maharashtra, Karnataka, Telangana, Tamil Nadu, and West Bengal duty circles. Public registration is restricted to citizens only.
                 </div>
               ) : (
                 <div className="login-footer-hint">
@@ -737,7 +737,7 @@ export default function PublicPortal({
 
               {regError && (
                 <div className="gov-alert-danger animate-shake">
-                  <span className="alert-icon">⚠️</span>
+                  
                   <span>{regError}</span>
                   {regIsDuplicate && (
                     <button
@@ -1029,7 +1029,7 @@ export default function PublicPortal({
 
           {caseSearchError && (
             <div className="gov-alert-danger mt-3">
-              <span className="alert-icon">⚠️</span>
+              
               <span>{caseSearchError}</span>
             </div>
           )}

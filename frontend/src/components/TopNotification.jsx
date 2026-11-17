@@ -62,7 +62,7 @@ export default function TopNotification({ notification, onDismiss, onAutoFill })
       case 'sent':
         return {
           badgeClass: 'top-toast-sent',
-          icon: '📨',
+          icon: '',
           title: 'OTP Sent Successfully',
           headline: 'Government of India (MHA SMS)',
           borderClass: 'border-saffron'
@@ -70,7 +70,7 @@ export default function TopNotification({ notification, onDismiss, onAutoFill })
       case 'invalid':
         return {
           badgeClass: 'top-toast-invalid',
-          icon: '⚠️',
+          icon: '',
           title: 'Invalid OTP',
           headline: 'Verification Alert',
           borderClass: 'border-danger'
@@ -86,7 +86,7 @@ export default function TopNotification({ notification, onDismiss, onAutoFill })
       case 'resent':
         return {
           badgeClass: 'top-toast-resent',
-          icon: '🔄',
+          icon: '',
           title: 'OTP Resent Successfully',
           headline: 'Government of India (MHA SMS)',
           borderClass: 'border-saffron'
@@ -94,7 +94,7 @@ export default function TopNotification({ notification, onDismiss, onAutoFill })
       case 'verified':
         return {
           badgeClass: 'top-toast-verified',
-          icon: '✅',
+          icon: '',
           title: 'Verification Successful',
           headline: 'National Cyber Security Clearance',
           borderClass: 'border-green'
@@ -163,7 +163,7 @@ export default function TopNotification({ notification, onDismiss, onAutoFill })
               className="btn-top-toast-copy"
               onClick={handleCopy}
             >
-              {copied ? '✓ Copied & Auto-filled!' : '📋 Copy & Fill Code'}
+              {copied ? 'Copied & Auto-filled' : 'Copy & Fill Code'}
             </button>
             <button
               type="button"

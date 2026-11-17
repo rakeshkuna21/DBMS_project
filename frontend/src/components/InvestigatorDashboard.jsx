@@ -152,7 +152,7 @@ export default function InvestigatorDashboard({
       {/* KPI Cards */}
       <div className="stats-kpi-grid">
         <div className="kpi-card kpi-navy">
-          <div className="kpi-icon">📁</div>
+          <div className="status-dot active"></div>
           <div className="kpi-info">
             <span className="kpi-num">{stats.total_cases}</span>
             <span className="kpi-label">Total Complaints</span>
@@ -160,7 +160,7 @@ export default function InvestigatorDashboard({
         </div>
 
         <div className="kpi-card kpi-blue">
-          <div className="kpi-icon">🔍</div>
+          <div className="status-dot active"></div>
           <div className="kpi-info">
             <span className="kpi-num">{stats.active_investigations}</span>
             <span className="kpi-label">Active Investigations</span>
@@ -168,7 +168,7 @@ export default function InvestigatorDashboard({
         </div>
 
         <div className="kpi-card kpi-green">
-          <div className="kpi-icon">🎯</div>
+          <div className="status-dot pending"></div>
           <div className="kpi-info">
             <span className="kpi-num">{stats.suspects_arrested}</span>
             <span className="kpi-label">Suspects Tracked / Arrested</span>
@@ -176,7 +176,7 @@ export default function InvestigatorDashboard({
         </div>
 
         <div className="kpi-card kpi-saffron">
-          <div className="kpi-icon">🏛️</div>
+          <div className="status-dot active"></div>
           <div className="kpi-info">
             <span className="kpi-num">{stats.upcoming_hearings}</span>
             <span className="kpi-label">Court Hearings Scheduled</span>
@@ -188,7 +188,7 @@ export default function InvestigatorDashboard({
       <section className="gov-card">
         <div className="table-filter-toolbar">
           <div>
-            <h2 className="section-title">📂 Department Cyber Crime Case Registry</h2>
+            <h2 className="section-title">Department Cyber Crime Case Registry</h2>
             <p className="section-subtitle">
               Manage status, log seized digital evidence, register suspects, and docket cases to Court.
             </p>
@@ -221,7 +221,7 @@ export default function InvestigatorDashboard({
           <p className="loading-hint">Loading assigned cases from Oracle 11g database...</p>
         ) : cases.length === 0 ? (
           <div className="empty-cases-box" style={{ padding: '2.5rem', textAlign: 'center', background: '#F8FAFC', borderRadius: '8px', border: '1px dashed #CBD5E1' }}>
-            <div style={{ fontSize: '2.2rem', marginBottom: '0.6rem' }}>🛡️</div>
+            
             <h3 style={{ color: '#1E293B', fontSize: '1.15rem', marginBottom: '0.4rem', fontWeight: '700' }}>
               No Complaints Currently Assigned to Badge #{user?.officer_id || 'OFFICER'}
             </h3>
@@ -301,14 +301,14 @@ export default function InvestigatorDashboard({
                           disabled={!isDirty || saveState === 'saving'}
                           onClick={() => handleSaveCase(c)}
                         >
-                          {saveState === 'saving' ? 'Saving...' : saveState === 'saved' ? '✓ Saved' : 'Save'}
+                          {saveState === 'saving' ? 'Saving...' : saveState === 'saved' ? 'Saved' : 'Save'}
                         </button>
                         <button
                           className="btn btn-sm btn-primary"
                           style={{ marginLeft: '6px' }}
                           onClick={() => setSelectedCaseForModal(c)}
                         >
-                          📂 Manage Case Dossier
+                          Manage Case Dossier
                         </button>
                       </td>
                     </tr>

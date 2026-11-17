@@ -31,11 +31,11 @@ export default function Header({
 
   return (
     <header className="site-header-gov">
-      {/* 1. TOP OFFICIAL GREEN GOVERNMENT STRIP */}
+      {/* 1. Top Government Information Strip */}
       <div className="gov-top-strip">
         <div className="gov-strip-inner">
           <div className="gov-strip-left">
-            <span className="gov-flag-icon">🇮🇳</span>
+            <span className="status-dot active"></span>
             <span className="gov-strip-text">
               GOVERNMENT OF INDIA &bull; MINISTRY OF HOME AFFAIRS (गृह मंत्रालय)
             </span>
@@ -107,25 +107,25 @@ export default function Header({
                       href="#report-all"
                       onClick={(e) => { e.preventDefault(); setActiveDropdown(null); if (onNavigateTab) onNavigateTab('report'); }}
                     >
-                      ✍️ File New Cyber Complaint
+                      File New Complaint
                     </a>
                     <a
                       href="#report-financial"
                       onClick={(e) => { e.preventDefault(); setActiveDropdown(null); if (onNavigateTab) onNavigateTab('report-financial'); }}
                     >
-                      💳 Financial Fraud / UPI Scam
+                      Financial Fraud / UPI Scam
                     </a>
                     <a
                       href="#report-women"
                       onClick={(e) => { e.preventDefault(); setActiveDropdown(null); if (onNavigateTab) onNavigateTab('report-women'); }}
                     >
-                      🛡️ Women / Child Cyber Safety
+                      Women / Child Safety
                     </a>
                     <a
                       href="#report-other"
                       onClick={(e) => { e.preventDefault(); setActiveDropdown(null); if (onNavigateTab) onNavigateTab('report-other'); }}
                     >
-                      💻 Other Cyber Crime Incidents
+                      Other Cyber Crime Incidents
                     </a>
                   </div>
                 )}
@@ -145,13 +145,13 @@ export default function Header({
                       href="#suspect-registry"
                       onClick={(e) => { e.preventDefault(); setActiveDropdown(null); if (onNavigateTab) onNavigateTab('suspect-registry'); }}
                     >
-                      🔎 National Suspect Registry
+                      National Suspect Registry
                     </a>
                     <a
                       href="#suspect-accounts"
                       onClick={(e) => { e.preventDefault(); setActiveDropdown(null); if (onNavigateTab) onNavigateTab('suspect-accounts'); }}
                     >
-                      🚫 Blocked Mule Bank Accounts &amp; Numbers
+                      Blocked Mule Accounts &amp; Numbers
                     </a>
                   </div>
                 )}
@@ -179,13 +179,13 @@ export default function Header({
                       href="#cyber-safety"
                       onClick={(e) => { e.preventDefault(); setActiveDropdown(null); if (onNavigateTab) onNavigateTab('cyber-safety'); }}
                     >
-                      📚 Cyber Hygiene &amp; Safety Tips
+                      Cyber Hygiene &amp; Safety Guidelines
                     </a>
                     <a
                       href="#faqs"
                       onClick={(e) => { e.preventDefault(); setActiveDropdown(null); if (onNavigateTab) onNavigateTab('faqs'); }}
                     >
-                      ❓ Citizen FAQs &amp; Help
+                      Citizen FAQs &amp; Help
                     </a>
                   </div>
                 )}
@@ -205,13 +205,13 @@ export default function Header({
                       href="#helpline"
                       onClick={(e) => { e.preventDefault(); setActiveDropdown(null); if (onNavigateTab) onNavigateTab('helpline'); }}
                     >
-                      📞 1930 Helpline Directory
+                      1930 Helpline Directory
                     </a>
                     <a
                       href="#feedback"
                       onClick={(e) => { e.preventDefault(); setActiveDropdown(null); if (onNavigateTab) onNavigateTab('feedback'); }}
                     >
-                      📝 Submit Portal Feedback
+                      Submit Portal Feedback
                     </a>
                   </div>
                 )}

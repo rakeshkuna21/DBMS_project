@@ -187,7 +187,7 @@ export default function App() {
       return;
     }
 
-    // 2. IF LOGGED IN: Seamless tab switching with instant feedback
+    // 2. IF LOGGED IN: Tab switching with status updates
     if (tabId === 'home') {
       setActiveNavTab('overview');
       triggerLoader('Opening Dashboard Overview...', 700);

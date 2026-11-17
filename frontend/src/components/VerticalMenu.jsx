@@ -59,7 +59,7 @@ export default function VerticalMenu({
         {/* User Identity Chip */}
         <div className="vmenu-user-chip">
           <div className="vmenu-avatar">
-            {loggedInUser ? (loggedInUser.role === 'Investigator' ? '👮' : '👤') : '🏛️'}
+            {loggedInUser ? (loggedInUser.role === 'Investigator' ? 'Officer' : 'Citizen') : 'Portal'}
           </div>
           <div className="vmenu-user-meta">
             <p className="vmenu-user-name">
@@ -92,7 +92,7 @@ export default function VerticalMenu({
               {loggedInUser && (
                 <li>
                   <button className="vmenu-item-btn" onClick={() => setActiveSection('profile')}>
-                    <span className="vmenu-item-icon">👤</span>
+                    
                     <div className="vmenu-item-content">
                       <span className="vmenu-item-title">My Account Details</span>
                       <span className="vmenu-item-desc">View registered profile and contact info</span>
@@ -104,7 +104,7 @@ export default function VerticalMenu({
 
               <li>
                 <button className="vmenu-item-btn" onClick={() => setActiveSection('settings')}>
-                  <span className="vmenu-item-icon">⚙️</span>
+                  
                   <div className="vmenu-item-content">
                     <span className="vmenu-item-title">Portal Settings</span>
                     <span className="vmenu-item-desc">Adjust font size &amp; test slow internet</span>
@@ -115,7 +115,7 @@ export default function VerticalMenu({
 
               <li>
                 <button className="vmenu-item-btn" onClick={() => setActiveSection('helpline')}>
-                  <span className="vmenu-item-icon">📞</span>
+                  
                   <div className="vmenu-item-content">
                     <span className="vmenu-item-title">Cyber Helpline Info</span>
                     <span className="vmenu-item-desc">Emergency Helpline 1930 &amp; state contacts</span>
@@ -127,7 +127,7 @@ export default function VerticalMenu({
               {/* CRITICAL REQUIREMENT: DEVELOPERS SECTION */}
               <li>
                 <button className="vmenu-item-btn vmenu-highlight-btn" onClick={() => setActiveSection('developers')}>
-                  <span className="vmenu-item-icon">👨‍💻</span>
+                  
                   <div className="vmenu-item-content">
                     <span className="vmenu-item-title">Developers</span>
                     <span className="vmenu-item-desc">Project engineering team credits</span>
@@ -138,7 +138,7 @@ export default function VerticalMenu({
 
               <li>
                 <button className="vmenu-item-btn" onClick={() => setActiveSection('database')}>
-                  <span className="vmenu-item-icon">🗄️</span>
+                  
                   <div className="vmenu-item-content">
                     <span className="vmenu-item-title">Database &amp; SQL Inspector</span>
                     <span className="vmenu-item-desc">Live Oracle 11g status and SQL logs</span>
@@ -150,7 +150,7 @@ export default function VerticalMenu({
               {loggedInUser && (
                 <li style={{ marginTop: '16px' }}>
                   <button className="vmenu-item-btn vmenu-logout-btn" onClick={() => { onClose(); onLogout(); }}>
-                    <span className="vmenu-item-icon">🚪</span>
+                    
                     <div className="vmenu-item-content">
                       <span className="vmenu-item-title">Log Out</span>
                       <span className="vmenu-item-desc">Safely end your current session</span>
@@ -166,7 +166,7 @@ export default function VerticalMenu({
           {/* ============================================================== */}
           {activeSection === 'profile' && loggedInUser && (
             <div className="vmenu-subpage">
-              <h3 className="vmenu-sub-title">👤 My Account Details</h3>
+              <h3 className="vmenu-sub-title">My Account Details</h3>
               <div className="profile-card">
                 <div className="profile-row">
                   <span className="p-label">Full Name:</span>
@@ -213,7 +213,7 @@ export default function VerticalMenu({
           {/* ============================================================== */}
           {activeSection === 'settings' && (
             <div className="vmenu-subpage">
-              <h3 className="vmenu-sub-title">⚙️ Portal Settings</h3>
+              <h3 className="vmenu-sub-title">Portal Settings</h3>
 
               <div className="setting-card">
                 <label className="setting-label">Text Size (Accessibility):</label>
@@ -270,7 +270,7 @@ export default function VerticalMenu({
           {/* ============================================================== */}
           {activeSection === 'helpline' && (
             <div className="vmenu-subpage">
-              <h3 className="vmenu-sub-title">📞 National Cyber Helpline</h3>
+              <h3 className="vmenu-sub-title">National Cyber Helpline</h3>
               <div className="helpline-banner-card">
                 <div className="helpline-number">DIAL 1930</div>
                 <p className="helpline-desc">Toll-Free National Helpline for Reporting Financial Cyber Frauds</p>
@@ -284,11 +284,11 @@ export default function VerticalMenu({
                   </p>
                 </div>
                 <div className="info-block">
-                  <h4>🌐 Official National Portal</h4>
+                  <h4>Official National Portal</h4>
                   <p>Visit <strong>cybercrime.gov.in</strong> to report all women/child safety issues or state nodal cyber crime incidents.</p>
                 </div>
                 <div className="info-block">
-                  <h4>🏢 Cyberabad Cyber Cell</h4>
+                  <h4>Cyberabad Cyber Cell</h4>
                   <p>Contact: 040-27852412 &bull; Gachibowli Road, Hyderabad, Telangana</p>
                 </div>
               </div>
@@ -300,11 +300,11 @@ export default function VerticalMenu({
           {/* ============================================================== */}
           {activeSection === 'developers' && (
             <div className="vmenu-subpage">
-              <h3 className="vmenu-sub-title">👨‍💻 Developers &amp; Project Credits</h3>
+              <h3 className="vmenu-sub-title">Developers &amp; Project Credits</h3>
 
               <div className="developers-official-card">
                 <div className="dev-header">
-                  <span className="dev-trophy">🏆</span>
+                  
                   <div>
                     <h4>National Cyber Crime Portal Project Team</h4>
                     <p>Database Management Systems (DBMS) Laboratory</p>
@@ -362,7 +362,7 @@ export default function VerticalMenu({
           {/* ============================================================== */}
           {activeSection === 'database' && (
             <div className="vmenu-subpage">
-              <h3 className="vmenu-sub-title">🗄️ Database &amp; SQL Inspector</h3>
+              <h3 className="vmenu-sub-title">Database &amp; SQL Inspector</h3>
 
               {loadingDb && <p className="loading-hint">Reading Oracle 11g XE status...</p>}
 
@@ -379,7 +379,7 @@ export default function VerticalMenu({
               <div className="sql-stream-header">
                 <h4>Recent Oracle 11g SQL Logs ({sqlLogs.length})</h4>
                 <button className="btn-sm btn-secondary" onClick={fetchDatabaseInfo}>
-                  🔄 Refresh
+                  Refresh
                 </button>
               </div>
 

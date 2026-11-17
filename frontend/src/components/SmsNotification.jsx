@@ -39,7 +39,7 @@ export default function SmsNotification({ sms, onDismiss, onAutoFill }) {
       <div className="sms-banner-card">
         <div className="sms-banner-header">
           <div className="sms-sender">
-            <span className="sms-sim-icon">📱</span>
+            
             <span className="sms-header-title">GOV-INDIA SMS &bull; Just Now</span>
           </div>
           <button className="sms-close-btn" onClick={onDismiss} title="Dismiss notification">
@@ -59,7 +59,7 @@ export default function SmsNotification({ sms, onDismiss, onAutoFill }) {
 
         <div className="sms-banner-actions">
           <button className="btn-sms-copy" onClick={handleCopy}>
-            {copied ? '✓ Copied & Filled!' : '📋 Copy & Fill OTP'}
+            {copied ? 'Copied & Filled' : 'Copy & Fill OTP'}
           </button>
           <button className="btn-sms-dismiss" onClick={onDismiss}>
             Dismiss

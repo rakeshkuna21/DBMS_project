@@ -319,49 +319,49 @@ export default function CitizenPortal({
           className={`subnav-btn ${activeTab === 'overview' ? 'active' : ''}`}
           onClick={() => switchTab('overview')}
         >
-          🏠 Overview &amp; Helpline 1930
+          Overview &amp; Helpline 1930
         </button>
         <button
           type="button"
           className={`subnav-btn ${activeTab === 'report' ? 'active' : ''}`}
           onClick={() => switchTab('report')}
         >
-          ✍️ Report a Cyber Crime
+          Report Cyber Crime
         </button>
         <button
           type="button"
           className={`subnav-btn ${activeTab === 'cases' ? 'active' : ''}`}
           onClick={() => switchTab('cases')}
         >
-          📋 My Complaints &amp; Status ({myCases.length})
+          My Complaints &amp; Status ({myCases.length})
         </button>
         <button
           type="button"
           className={`subnav-btn ${activeTab === 'suspect' ? 'active' : ''}`}
           onClick={() => switchTab('suspect')}
         >
-          🔎 National Suspect Registry
+          National Suspect Registry
         </button>
         <button
           type="button"
           className={`subnav-btn ${activeTab === 'hearings' ? 'active' : ''}`}
           onClick={() => switchTab('hearings')}
         >
-          🏛️ Court Hearings ({allHearings.length})
+          Court Hearings ({allHearings.length})
         </button>
         <button
           type="button"
           className={`subnav-btn ${activeTab === 'learning' ? 'active' : ''}`}
           onClick={() => switchTab('learning')}
         >
-          📚 Learning Corner &amp; Tips
+          Learning Corner &amp; Guidelines
         </button>
         <button
           type="button"
           className={`subnav-btn ${activeTab === 'help' ? 'active' : ''}`}
           onClick={() => switchTab('help')}
         >
-          📞 Help &amp; Feedback
+          Help &amp; Feedback
         </button>
       </nav>
 
@@ -420,7 +420,7 @@ export default function CitizenPortal({
       {/* ==================================================================== */}
       {activeTab === 'report' && (
         <section className="gov-card">
-          <h2 className="section-title">✍️ Report a Cyber Crime to Police Department</h2>
+          <h2 className="section-title">Report Cyber Crime to Police Department</h2>
           <p className="section-subtitle">
             Please provide accurate details of the online fraud or harassment you experienced. Your information is securely encrypted and submitted directly to the Cyber Crime Police Cell.
           </p>
@@ -428,12 +428,12 @@ export default function CitizenPortal({
           {/* Stepper Indicators */}
           <div className="form-stepper-row">
             <div className={`step-node ${complaintStep >= 1 ? 'active' : ''} ${complaintStep > 1 ? 'done' : ''}`}>
-              <span className="sn-circle">{complaintStep > 1 ? '✓' : '1'}</span>
+              <span className="sn-circle">1</span>
               <span className="sn-text">Incident Details</span>
             </div>
             <div className="step-bar"></div>
             <div className={`step-node ${complaintStep >= 2 ? 'active' : ''} ${complaintStep > 2 ? 'done' : ''}`}>
-              <span className="sn-circle">{complaintStep > 2 ? '✓' : '2'}</span>
+              <span className="sn-circle">2</span>
               <span className="sn-text">Phone or Computer Used</span>
             </div>
             <div className="step-bar"></div>
@@ -649,7 +649,7 @@ export default function CitizenPortal({
           {complaintStep === 3 && (
             <div className="form-step-pane">
               <div className="review-summary-card">
-                <h3 className="sub-title">📋 Summary of Your Report</h3>
+                <h3 className="sub-title">Summary of Complaint Report</h3>
 
                 <div className="review-group">
                   <h4>Complaint Overview:</h4>
@@ -690,7 +690,7 @@ export default function CitizenPortal({
                   disabled={!declarationChecked}
                   onClick={handleSubmitComplaint}
                 >
-                  ✓ Submit Complaint &amp; Get Official Receipt &rarr;
+                  Submit Complaint &amp; Generate Receipt &rarr;
                 </button>
               </div>
             </div>
@@ -705,7 +705,7 @@ export default function CitizenPortal({
         <section className="gov-card">
           <div className="title-with-action">
             <div>
-              <h2 className="section-title">📋 My Reported Cyber Complaints</h2>
+              <h2 className="section-title">Reported Cyber Complaints</h2>
               <p className="section-subtitle">Real-time status of complaints filed from your mobile number.</p>
             </div>
             <button className="btn btn-primary btn-sm" onClick={() => switchTab('report')}>
@@ -769,7 +769,7 @@ export default function CitizenPortal({
                           className="btn btn-sm btn-secondary"
                           onClick={() => setReceiptCase(c)}
                         >
-                          📄 Download Receipt
+                          Download Receipt
                         </button>
                       </td>
                     </tr>
@@ -788,7 +788,7 @@ export default function CitizenPortal({
         <section className="gov-card">
           <div className="title-with-action">
             <div>
-              <h2 className="section-title">🔎 National Suspect Registry &amp; Blocked Mule Data</h2>
+              <h2 className="section-title">National Suspect Registry &amp; Blocked Mule Data</h2>
               <p className="section-subtitle">
                 Official registry of verified cyber criminals, frozen mule bank accounts, and flagged UPI identifiers maintained under I4C.
               </p>
@@ -798,14 +798,14 @@ export default function CitizenPortal({
               className="btn btn-sm btn-secondary"
               onClick={fetchSuspects}
             >
-              🔄 Refresh Database
+              Refresh Database
             </button>
           </div>
 
           {/* Search & Filter Toolbar */}
           <div className="suspect-toolbar">
             <div className="suspect-search-box">
-              <span className="search-icon">🔍</span>
+              <span className="search-icon"></span>
               <input
                 type="text"
                 className="form-input suspect-search-input"
@@ -833,21 +833,21 @@ export default function CitizenPortal({
                 className={`filter-pill ${suspectFilter === 'MULE' ? 'active' : ''}`}
                 onClick={() => setSuspectFilter('MULE')}
               >
-                🚫 Mule Bank Accounts
+                Mule Bank Accounts
               </button>
               <button
                 type="button"
                 className={`filter-pill ${suspectFilter === 'FROZEN' ? 'active' : ''}`}
                 onClick={() => setSuspectFilter('FROZEN')}
               >
-                ❄️ Frozen under 1930
+                Frozen under Helpline 1930
               </button>
               <button
                 type="button"
                 className={`filter-pill ${suspectFilter === 'HIGH' ? 'active' : ''}`}
                 onClick={() => setSuspectFilter('HIGH')}
               >
-                ⚠️ High Risk
+                High Risk
               </button>
             </div>
           </div>
@@ -883,7 +883,7 @@ export default function CitizenPortal({
                         </div>
                       </td>
                       <td>
-                        <div>📱 +91-{s.phone}</div>
+                        <div>+91-{s.phone}</div>
                         {s.upi_id && (
                           <div style={{ fontSize: '0.78rem', color: '#b45309', fontFamily: 'monospace' }}>
                             UPI: {s.upi_id}
@@ -923,7 +923,7 @@ export default function CitizenPortal({
       {/* ==================================================================== */}
       {activeTab === 'hearings' && (
         <section className="gov-card">
-          <h2 className="section-title">🏛️ My Court Hearing Dates &amp; Judicial Orders</h2>
+          <h2 className="section-title">Court Hearing Dates &amp; Judicial Orders</h2>
           <p className="section-subtitle">
             Dates scheduled by the designated Cyber Special Magistrate for recovery and prosecution of your cases.
           </p>
@@ -985,14 +985,14 @@ export default function CitizenPortal({
       {activeTab === 'learning' && (
         <div className="tab-view-content">
           <section className="gov-card">
-            <h2 className="section-title">📚 Citizen Cyber Hygiene &amp; Safety Guidelines</h2>
+            <h2 className="section-title">Citizen Cyber Hygiene &amp; Safety Guidelines</h2>
             <p className="section-subtitle">
               Essential precautions issued by the Ministry of Home Affairs to protect citizens against digital fraud.
             </p>
 
             <div className="safety-cards-grid">
               <div className="safety-card card-alert-saffron">
-                <span className="sc-icon">⏱️</span>
+                <span className="sc-icon"></span>
                 <h3>Golden Hour Banking Fraud Rule</h3>
                 <p>
                   Call <strong>1930</strong> within <strong>2 hours</strong> of an unauthorized transaction. The National Cyber Crime Reporting Portal notifies nodal officers across all Indian banks to freeze mule accounts before fraudsters can withdraw your funds at ATMs.
@@ -1000,7 +1000,7 @@ export default function CitizenPortal({
               </div>
 
               <div className="safety-card card-alert-green">
-                <span className="sc-icon">🔒</span>
+                <span className="sc-icon"></span>
                 <h3>Safe UPI Practices</h3>
                 <p>
                   <strong>Remember:</strong> You NEVER need to enter your UPI PIN to RECEIVE money. Entering your PIN always debits money from your account. If a buyer insists on sending a QR code to receive payment, it is 100% a scam.
@@ -1008,7 +1008,7 @@ export default function CitizenPortal({
               </div>
 
               <div className="safety-card card-alert-blue">
-                <span className="sc-icon">📱</span>
+                <span className="sc-icon"></span>
                 <h3>Malicious APK Warnings</h3>
                 <p>
                   Never install apps sent as <code>.apk</code> files on WhatsApp or SMS (e.g., fake electricity bill update, courier tracking, reward point redemptions). Only download apps from official stores (Google Play or Apple App Store).
@@ -1016,7 +1016,7 @@ export default function CitizenPortal({
               </div>
 
               <div className="safety-card card-alert-purple">
-                <span className="sc-icon">⚖️</span>
+                <span className="sc-icon"></span>
                 <h3>"Digital Arrest" Extortion Advisory</h3>
                 <p>
                   Police officers, CBI, or judges <strong>never</strong> conduct investigations via Skype or WhatsApp video calls, and <strong>never</strong> demand money into "RBI safe custody accounts". If threatened with digital arrest, disconnect immediately and dial 1930.
@@ -1025,7 +1025,7 @@ export default function CitizenPortal({
             </div>
 
             {/* Citizen FAQs Accordion */}
-            <h3 className="section-title" style={{ marginTop: '2rem' }}>❓ Frequently Asked Questions (FAQs)</h3>
+            <h3 className="section-title" style={{ marginTop: '2rem' }}>Frequently Asked Questions (FAQs)</h3>
             <div className="faq-accordion-list">
               {[
                 {
@@ -1072,7 +1072,7 @@ export default function CitizenPortal({
       {activeTab === 'help' && (
         <div className="tab-view-content">
           <section className="gov-card">
-            <h2 className="section-title">📞 National Cyber Helpline 1930 &amp; Directory</h2>
+            <h2 className="section-title">National Cyber Helpline 1930 &amp; Directory</h2>
             <p className="section-subtitle">
               Reach out to designated police nodal authorities and state cyber headquarters.
             </p>
@@ -1094,12 +1094,12 @@ export default function CitizenPortal({
             </div>
 
             {/* Citizen Feedback Form */}
-            <h3 className="section-title" style={{ marginTop: '2.5rem' }}>📝 Submit Portal Feedback</h3>
+            <h3 className="section-title" style={{ marginTop: '2.5rem' }}>Submit Portal Feedback</h3>
             <p className="section-subtitle">Help the Ministry improve portal accessibility and ease of use.</p>
 
             {feedbackSent ? (
               <div className="alert alert-success">
-                ✓ Thank you! Your feedback has been recorded safely in the Government audit registry.
+                Thank you. Your feedback has been recorded in the audit registry.
               </div>
             ) : (
               <form onSubmit={handleFeedbackSubmit} className="feedback-form">

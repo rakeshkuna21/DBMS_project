@@ -255,7 +255,7 @@ export default function CaseManagementModal({ caseData, investigators = [], onCl
         <div className="modal-header">
           <div>
             <h2 className="modal-title">
-              ⚖️ Case Investigation &amp; Entity Dossier: Case #{caseId}
+              Case Investigation Dossier: Case #{caseId}
             </h2>
             <p className="modal-subtitle">
               {caseData.case_title} &bull; Victim: {caseData.victim_name || 'Citizen'} &bull; Status: <strong>{caseData.case_status}</strong>
@@ -277,19 +277,19 @@ export default function CaseManagementModal({ caseData, investigators = [], onCl
             className={`modal-tab-btn ${activeTab === 'evidence' ? 'active' : ''}`}
             onClick={() => setActiveTab('evidence')}
           >
-            💾 Digital Evidence &amp; Devices ({devices.length + evidenceList.length})
+            Digital Evidence &amp; Devices ({devices.length + evidenceList.length})
           </button>
           <button
             className={`modal-tab-btn ${activeTab === 'suspects' ? 'active' : ''}`}
             onClick={() => setActiveTab('suspects')}
           >
-            👤 Suspects &amp; Arrests ({suspects.length})
+            Suspects &amp; Arrests ({suspects.length})
           </button>
           <button
             className={`modal-tab-btn ${activeTab === 'court' ? 'active' : ''}`}
             onClick={() => setActiveTab('court')}
           >
-            🏛️ Court &amp; Hearings ({hearings.length})
+            Court &amp; Hearings ({hearings.length})
           </button>
         </div>
 
@@ -304,7 +304,7 @@ export default function CaseManagementModal({ caseData, investigators = [], onCl
             <div className="tab-pane">
               {/* Registered Digital Devices */}
               <div className="sub-section">
-                <h3 className="sub-title">📱 Registered Digital Devices (DIGITAL_DEVICE)</h3>
+                <h3 className="sub-title">Registered Digital Devices (DIGITAL_DEVICE)</h3>
                 {devices.length === 0 ? (
                   <p className="empty-hint">No hardware devices logged for this case yet.</p>
                 ) : (
@@ -414,7 +414,7 @@ export default function CaseManagementModal({ caseData, investigators = [], onCl
 
               {/* Forensic Evidence Table */}
               <div className="sub-section" style={{ marginTop: '24px' }}>
-                <h3 className="sub-title">🔬 Forensic Evidence Vault (EVIDENCE)</h3>
+                <h3 className="sub-title">Forensic Evidence Repository (EVIDENCE)</h3>
                 {evidenceList.length === 0 ? (
                   <p className="empty-hint">No forensic evidence files linked to this case yet.</p>
                 ) : (
@@ -536,7 +536,7 @@ export default function CaseManagementModal({ caseData, investigators = [], onCl
           {activeTab === 'suspects' && !loading && (
             <div className="tab-pane">
               <div className="sub-section">
-                <h3 className="sub-title">🕵️ Identified Suspects &amp; Interrogations (SUSPECT)</h3>
+                <h3 className="sub-title">Identified Suspects (SUSPECT)</h3>
                 {suspects.length === 0 ? (
                   <p className="empty-hint">No suspect records logged for this cyber investigation.</p>
                 ) : (
@@ -702,7 +702,7 @@ export default function CaseManagementModal({ caseData, investigators = [], onCl
           {activeTab === 'court' && !loading && (
             <div className="tab-pane">
               <div className="sub-section">
-                <h3 className="sub-title">🏛️ Judicial Hearings &amp; Court Orders (CASE_HEARING)</h3>
+                <h3 className="sub-title">Judicial Hearings &amp; Court Orders (CASE_HEARING)</h3>
                 {hearings.length === 0 ? (
                   <p className="empty-hint">No court hearings scheduled for this case yet.</p>
                 ) : (
