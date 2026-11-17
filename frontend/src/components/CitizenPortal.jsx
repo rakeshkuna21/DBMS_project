@@ -1007,7 +1007,7 @@ export default function CitizenPortal({
                 </p>
               </div>
 
-              <div className="safety-card card-alert-blue">
+              <div className="safety-card card-alert-saffron">
                 <span className="sc-icon"></span>
                 <h3>Malicious APK Warnings</h3>
                 <p>
@@ -1015,7 +1015,7 @@ export default function CitizenPortal({
                 </p>
               </div>
 
-              <div className="safety-card card-alert-purple">
+              <div className="safety-card card-alert-green">
                 <span className="sc-icon"></span>
                 <h3>"Digital Arrest" Extortion Advisory</h3>
                 <p>

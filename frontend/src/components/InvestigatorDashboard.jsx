@@ -151,7 +151,7 @@ export default function InvestigatorDashboard({
 
       {/* KPI Cards */}
       <div className="stats-kpi-grid">
-        <div className="kpi-card kpi-navy">
+        <div className="kpi-card kpi-charcoal">
           <div className="status-dot active"></div>
           <div className="kpi-info">
             <span className="kpi-num">{stats.total_cases}</span>
@@ -159,7 +159,7 @@ export default function InvestigatorDashboard({
           </div>
         </div>
 
-        <div className="kpi-card kpi-blue">
+        <div className="kpi-card kpi-saffron">
           <div className="status-dot active"></div>
           <div className="kpi-info">
             <span className="kpi-num">{stats.active_investigations}</span>
